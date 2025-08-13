@@ -1,0 +1,48 @@
+/api/v1
+│
+├── /auth
+│    ├── POST /register       → validateBody(RegisterSchema), invite-code → createUser 
+│    ├── POST /login          → validateBody(LoginSchema) → loginUser
+│    ├── GET  /me             → authMiddleware → getCurrentUser
+│
+├── /users
+│    ├── GET    /             → authMiddleware, isAdmin → listUsers
+│    ├── GET    /:id          → authMiddleware → getUser
+│    ├── PATCH  /:id          → authMiddleware, isAdmin → updateUser
+│    ├── DELETE /:id          → authMiddleware, isAdmin → deleteUser
+│
+├── /students
+│    ├── POST   /             → authMiddleware, isAdmin → createStudent
+│    ├── GET    /             → authMiddleware → listStudents
+│    ├── GET    /:id          → authMiddleware → getStudent
+│    ├── PATCH  /:id          → authMiddleware, isAdmin → updateStudent
+│    ├── DELETE /:id          → authMiddleware, isAdmin → deleteStudent
+│
+├── /teachers
+│    ├── POST   /             → authMiddleware, isAdmin → createTeacher
+│    ├── GET    /             → authMiddleware → listTeachers
+│    ├── GET    /:id          → authMiddleware → getTeacher
+│    ├── PATCH  /:id          → authMiddleware, isAdmin → updateTeacher
+│    ├── DELETE /:id          → authMiddleware, isAdmin → deleteTeacher
+│
+├── /classes
+│    ├── POST   /             → authMiddleware, isAdmin → createClass
+│    ├── GET    /             → authMiddleware → listClasses
+│    ├── GET    /:id          → authMiddleware → getClass
+│    ├── PATCH  /:id          → authMiddleware, isAdmin → updateClass
+│    ├── DELETE /:id          → authMiddleware, isAdmin → deleteClass
+│
+├── /subjects
+│    ├── POST   /             → authMiddleware, isAdmin → createSubject
+│    ├── GET    /             → authMiddleware → listSubjects
+│    ├── GET    /:id          → authMiddleware → getSubject
+│    ├── PATCH  /:id          → authMiddleware, isAdmin → updateSubject
+│    ├── DELETE /:id          → authMiddleware, isAdmin → deleteSubject
+│
+├── /attendance
+│    ├── POST   /             → authMiddleware, isTeacherOrAdmin → markAttendance
+│    ├── GET    /class/:id    → authMiddleware → getClassAttendance
+│
+└── /grades
+     ├── POST   /             → authMiddleware, isTeacherOrAdmin → assignGrade
+     ├── GET    /student/:id  → authMiddleware → getStudentGrades

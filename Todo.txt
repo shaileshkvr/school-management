@@ -1,0 +1,16 @@
+====== Pending Tasks ======
+——— working on user model
+    - Indexing
+
+——— work on auth controllers
+    - add register
+    - add login & logout
+    - add me
+
+——— work on auth routes
+
+——— work on user controllers
+
+——— 
+
+——— 
