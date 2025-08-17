@@ -2,164 +2,94 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
+const ALLOWED_ROLES = ['student', 'teacher', 'parent', 'admin'];
+
 const userSchema = new mongoose.Schema(
   {
-    role: {
-      type: String,
-      enum: ['admin', 'teacher', 'student', 'parent'],
-      required: true,
-      index: true,
-    },
     fullName: {
       type: String,
       required: true,
       trim: true,
-      index: true,
-      minlength: 3,
     },
-    profile: {
-      url: {
-        type: String,
-        required: true,
-      },
-      publicId: {
-        type: String,
-        required: true,
-      },
-    },
-    password: {
-      type: String,
-      minLength: 8,
-      required: true,
-    },
-
-    // Role-specific fields
     email: {
       type: String,
-      required: function () {
-        return this.role !== 'student' || this.grade > 5;
-      },
-      unique: true,
       lowercase: true,
       trim: true,
-      index: true,
-    },
-    isClassInCharge: {
-      type: Boolean,
-      default: false,
-      required: function () {
-        return this.role === 'teacher';
+      validate: {
+        validator: function (v) {
+          // Email only required if NOT student OR grade > 5
+          if (!this.roles.includes('student') || this.grade > 5) {
+            return /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(v || '');
+          }
+          return true;
+        },
+        message: 'Invalid email format',
       },
+    },
+    phone: {
+      type: String,
+      trim: true,
+      required: true,
     },
     grade: {
       type: Number,
       min: 1,
       max: 12,
-      required: function () {
-        return this.role === 'student' || (this.role === 'teacher' && this.isClassInCharge);
-      },
     },
-    section: {
-      type: String,
-      trim: true,
-      uppercase: true,
-      required: function () {
-        return this.role === 'student' || (this.role === 'teacher' && this.isClassInCharge);
-      },
-    },
-    subjectSpecialization: {
-      type: String,
-      required: function () {
-        return this.role === 'teacher';
-      },
-    },
-    qualification: {
-      type: String,
-      required: function () {
-        return this.role === 'teacher';
-      },
-    },
-    admissionNumber: {
-      type: String,
-      required: function () {
-        return this.role === 'student';
-      },
-    },
-    parentId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User', // points to parent
-      required: function () {
-        return this.role === 'student';
-      },
-    },
-    childId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User', // points to student
-      required: function () {
-        return this.role === 'parent';
-      },
-    },
-
-    // Verification & status
-    documents: [
-      {
-        name: {
-          type: String,
-          required: true,
+    roles: {
+      type: [String],
+      required: true,
+      index: true,
+      validate: {
+        validator: function (roles) {
+          if (!roles.length) return false;
+          if (roles.includes('student') && roles.length > 1) return false;
+          return roles.every((r) => ALLOWED_ROLES.includes(r));
         },
-        url: {
-          type: String,
-          required: true,
-        },
-        publicId: {
-          type: String,
-          required: true,
-        },
-        status: {
-          type: String,
-          enum: ['pending', 'approved', 'rejected'],
-          default: 'pending',
-        },
+        message: 'Invalid role combination',
       },
-    ],
-    isActive: {
-      type: Boolean,
-      default: false,
+    },
+    password: {
+      type: String,
+      required: true,
+      minlength: 6,
     },
   },
   { timestamps: true }
 );
 
+// Normalize roles before validation
+userSchema.pre('validate', function (next) {
+  if (this.roles && Array.isArray(this.roles)) {
+    this.roles = [...new Set(this.roles.map((r) => r.toLowerCase().trim()))];
+  }
+  next();
+});
+
+// Hash password before save
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   this.password = await bcrypt.hash(this.password, 10);
   next();
 });
 
-userSchema.methods.isPasswordValid = async function (password) {
+// Compare password
+userSchema.methods.isPasswordCorrect = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
 
+// Generate JWT Access Token
 userSchema.methods.generateAccessToken = function () {
   return jwt.sign(
     {
       _id: this._id,
-      role: this.role,
+      roles: this.roles,
       fullName: this.fullName,
       email: this.email || '',
     },
     process.env.ACCESS_TOKEN_SECRET,
-    {
-      expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
-    }
+    { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
   );
 };
 
-userSchema.methods.generateRefreshToken = function () {
-  return jwt.sign({ _id: this._id }, process.env.REFRESH_TOKEN_SECRET, {
-    expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
-  });
-};
-
-const User = mongoose.model('User', userSchema);
-export default User;
+export const User = mongoose.model('User', userSchema);
