@@ -11,6 +11,24 @@ const userSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    adhar: {
+      type: String,
+      required: true,
+      unique: true,
+      match: [/^\d{12}$/, 'Aadhaar must be exactly 12 digits'],
+    },
+    dateOfBirth: {
+      type: Date,
+      validate: {
+        validator: function (value) {
+          if (!value) return true; // allow empty for parents
+          const ageDiff = Date.now() - value.getTime();
+          const age = new Date(ageDiff).getUTCFullYear() - 1970;
+          return age > 5 && age < 60;
+        },
+        message: 'Enter a valid date of birth (age must be between 5 and 60).',
+      },
+    },
     email: {
       type: String,
       lowercase: true,
@@ -26,15 +44,22 @@ const userSchema = new mongoose.Schema(
         message: 'Invalid email format',
       },
     },
+    bloodGroup: {
+      type: String,
+      enum: ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'],
+    },
     phone: {
       type: String,
-      trim: true,
       required: true,
+      match: [/^\d{10}$/, 'Phone number must be 10 digits'],
     },
     grade: {
       type: Number,
       min: 1,
       max: 12,
+      required: function () {
+        return this.roles.includes('student');
+      },
     },
     roles: {
       type: [String],
@@ -52,8 +77,13 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
-      select: false, // Don't return password by default
+      select: false,
       minlength: [8, 'Password must be at least 8 characters'],
+      validate: {
+        validator: (val) =>
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(val),
+        message: 'Password must contain uppercase, lowercase, number, and special char',
+      },
     },
     refreshToken: {
       type: String,
