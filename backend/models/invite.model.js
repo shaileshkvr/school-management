@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const inviteSchema = new mongoose.Schema(
   {
@@ -11,7 +11,7 @@ const inviteSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["student", "teacher", "admin"],
+      enum: ['student', 'teacher', 'admin'],
       required: true,
     },
     expiresAt: {
@@ -40,12 +40,12 @@ const inviteSchema = new mongoose.Schema(
 inviteSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 // pre-save validator to auto-expire if max uses hit
-inviteSchema.pre("save", function (next) {
+inviteSchema.pre('save', function (next) {
   if (this.usedCount >= this.maxUses) {
     this.isValid = false;
   }
   next();
 });
 
-const Invite = mongoose.model("Invite", inviteSchema);
+const Invite = mongoose.model('Invite', inviteSchema);
 export default Invite;
