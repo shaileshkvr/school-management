@@ -30,9 +30,9 @@ const verifyInviteCode = asynchandler(async (req, res, next) => {
     return res.status(400).json({ message: 'Invite code is required' });
   }
 
-  const invite = await Invite.findOne({ code: inviteCode, expiresAt: { $gt: new Date() } });
-  if (!invite) {
-    return res.status(400).json({ message: 'Invite code is invalid or expired' });
+  const invite = await Invite.findOne({ code: inviteCode });
+  if (!invite || !invite.isValid) {
+    return res.status(404).json({ message: 'Invalid or Expired Invite Code' });
   }
 
   // Verified invite code, return allowed roles
@@ -46,13 +46,20 @@ const loginUser = asynchandler(async (req, res) => {});
 
 const forgetPassword = asynchandler(async (req, res) => {});
 
-// Secured Routes
-
-const logoutUser = asynchandler(async (req, res) => {});
-
-const resetPassword = asynchandler(async (req, res) => {});
+// Authentication required
 
 const getAccessToken = asynchandler(async (req, res) => {});
 
-// Exports
-export { verifyInviteCode, registerUser };
+const resetPassword = asynchandler(async (req, res) => {});
+
+const logoutUser = asynchandler(async (req, res) => {});
+
+export {
+  verifyInviteCode,
+  registerUser,
+  loginUser,
+  forgetPassword,
+  logoutUser,
+  resetPassword,
+  getAccessToken,
+};
