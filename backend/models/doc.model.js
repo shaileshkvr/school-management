@@ -24,5 +24,4 @@ const docSchema = new mongoose.Schema(
 );
 
 const Doc = mongoose.model('Doc', docSchema);
-
 export default Doc;

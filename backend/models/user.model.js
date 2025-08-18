@@ -10,15 +10,22 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+      index: true,
+      minlength: [3, 'Full name must be at least 3 characters'],
+      maxlength: [50, 'Full name cannot exceed 50 characters'],
     },
     adhar: {
       type: String,
       required: true,
       unique: true,
       match: [/^\d{12}$/, 'Aadhaar must be exactly 12 digits'],
+      index: true,
     },
     dateOfBirth: {
       type: Date,
+      required: function () {
+        return this.roles.includes('student') || this.roles.includes('parent');
+      },
       validate: {
         validator: function (value) {
           if (!value) return true; // allow empty for parents
@@ -35,23 +42,19 @@ const userSchema = new mongoose.Schema(
       trim: true,
       validate: {
         validator: function (v) {
-          // Email only required if NOT student OR grade > 5
-          if (!this.roles.includes('student') || this.grade > 5) {
-            return /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(v || '');
-          }
-          return true;
+          return /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(v || '');
         },
         message: 'Invalid email format',
       },
-    },
-    bloodGroup: {
-      type: String,
-      enum: ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'],
     },
     phone: {
       type: String,
       required: true,
       match: [/^\d{10}$/, 'Phone number must be 10 digits'],
+    },
+    bloodGroup: {
+      type: String,
+      enum: ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'],
     },
     grade: {
       type: Number,
@@ -87,6 +90,7 @@ const userSchema = new mongoose.Schema(
     },
     refreshToken: {
       type: String,
+      default: '',
       select: false, // Don't return refreshToken by default
     },
   },
@@ -134,4 +138,5 @@ userSchema.methods.generateRefreshToken = function () {
   });
 };
 
-export const User = mongoose.model('User', userSchema);
+const User = mongoose.model('User', userSchema);
+export default User;
