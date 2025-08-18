@@ -12,9 +12,9 @@ import {
 
 const router = Router();
 
-router.route('/verify-invite-code');
+router.route('/verify-invite-code', verifyInviteCode);
 
-router.route('/register' /* auth controller fn */);
+router.route('/register', registerUser);
 
 router.route('/login' /* auth controller fn */);
 

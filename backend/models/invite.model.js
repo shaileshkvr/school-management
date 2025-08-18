@@ -6,46 +6,54 @@ const inviteSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
-      minLength: 8,
-      maxLength: 12,
+      minlength: 8,
+      maxlength: 12,
+      trim: true,
     },
     role: {
       type: String,
       enum: ['student', 'teacher', 'admin'],
       required: true,
     },
-    expiresAt: {
-      type: Date,
-      required: true,
-      default: () => new Date(Date.now() + 72 * 60 * 60 * 1000),
-    },
     maxUses: {
       type: Number,
-      default: 1, // one-time use by default
+      default: 1, // one-time use unless specified
       min: 1,
     },
     usedCount: {
       type: Number,
       default: 0,
+      min: 0,
     },
-    isValid: {
+    isActive: {
       type: Boolean,
       default: true,
+    },
+    expiresAt: {
+      type: Date,
+      required: true,
+      default: () => new Date(Date.now() + 72 * 60 * 60 * 1000), // 72 hrs
     },
   },
   { timestamps: true }
 );
 
-// expire after time
+// TTL index -> deletes invite code when expiresAt is reached
 inviteSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
-// pre-save validator to auto-expire if max uses hit
-inviteSchema.pre('save', function (next) {
-  if (this.usedCount >= this.maxUses) {
-    this.isValid = false;
-  }
-  next();
+// Virtual field for quick validity check
+inviteSchema.virtual('isValid').get(function () {
+  return this.isActive && this.usedCount < this.maxUses && this.expiresAt > new Date();
 });
+
+// Utility method -> mark code as used
+inviteSchema.methods.markUsed = async function () {
+  this.usedCount += 1;
+  if (this.usedCount >= this.maxUses) {
+    this.isActive = false;
+  }
+  await this.save();
+};
 
 const Invite = mongoose.model('Invite', inviteSchema);
 export default Invite;
