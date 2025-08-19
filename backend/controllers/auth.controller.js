@@ -40,7 +40,7 @@ const verifyInviteCode = asynchandler(async (req, res, next) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, { inviteCode, role: invite.role }, 'Invite code is valid'));
+    .json(new ApiResponse(200, { role: invite.role }, 'Invite code is valid'));
 });
 
 const registerUser = asynchandler(async (req, res) => {
