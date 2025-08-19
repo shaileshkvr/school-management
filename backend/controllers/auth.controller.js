@@ -110,6 +110,38 @@ const registerUser = asynchandler(async (req, res) => {
 
 const loginUser = asynchandler(async (req, res) => {
   const { username, email, password } = req.body;
+  if ((!username && !email) || !password) {
+    throw new ApiError(400, 'Username/Email and Password are required');
+  }
+
+  // Build query
+  const query = {};
+  if (username) query.username = username.toLowerCase().trim();
+  if (email) query.email = email.toLowerCase().trim();
+
+  const user = await User.findOne(query).select('+password');
+  if (!user || !(await user.comparePassword(password))) {
+    throw new ApiError(401, 'Invalid credentials');
+  }
+
+  // Token generation
+  const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
+  const userObj = user.toObject();
+  delete userObj.password;
+  delete userObj.refreshToken;
+
+  const isProd = process.env.NODE_ENV === 'production';
+  const cookieOptions = {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: 'Strict',
+  };
+
+  return res
+    .status(200)
+    .cookie('refreshToken', refreshToken, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 }) // days * hours * minutes * seconds * milliseconds
+    .cookie('accessToken', accessToken, cookieOptions)
+    .json(new ApiResponse(200, { user: userObj }, 'Login successful'));
 });
 
 const forgetPassword = asynchandler(async (req, res) => {});
