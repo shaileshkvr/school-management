@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { upload } from '../middlewares/multer.middleware.js';
+import verifyJwt from '../middlewares/auth.middleware.js';
 import {
   verifyInviteCode,
   registerUser,
@@ -12,20 +13,20 @@ import {
 
 const router = Router();
 
-router.route('/verify-invite-code', verifyInviteCode);
+router.route('/verify-invite-code').post(verifyInviteCode);
 
-router.route('/register', registerUser);
+router.route('/register').post(registerUser);
 
-router.route('/login' /* auth controller fn */);
+router.route('/login').post(loginUser);
 
-router.route('/forgot-password' /* auth controller fn */);
+// router.route('/forgot-password').patch(forgetPassword);
 
-// Secured Routes
+// // Secured Routes
 
-router.route('/reset-password' /* auth controller fn */);
+// router.route('/get-access-token').get(getAccessToken);
 
-router.route('/get-access-token' /* auth controller fn */);
+// router.route('/reset-password').patch(verifyJwt, resetPassword);
 
-router.route('/logout' /* auth controller fn */);
+// router.route('/logout').get(verifyJwt, logoutUser);
 
 export default router;

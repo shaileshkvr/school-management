@@ -6,13 +6,36 @@ const ALLOWED_ROLES = ['student', 'teacher', 'parent', 'admin'];
 
 const userSchema = new mongoose.Schema(
   {
-    fullName: {
+    firstName: {
       type: String,
+      lowercase: true,
       required: true,
       trim: true,
       index: true,
+      minlength: [3, 'First name must be at least 3 characters'],
+      maxlength: [20, 'First name cannot exceed 20 characters'],
+    },
+    lastName: {
+      type: String,
+      lowercase: true,
+      trim: true,
+    },
+    fullName: {
+      type: String,
+      trim: true,
+      required: true,
+      index: true,
       minlength: [3, 'Full name must be at least 3 characters'],
       maxlength: [50, 'Full name cannot exceed 50 characters'],
+    },
+    username: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
+      immutable: true,
+      index: true,
     },
     adhar: {
       type: String,

@@ -4,6 +4,7 @@ import ApiResponse from '../utility/ApiResponse.js';
 import User from '../models/user.model.js';
 import Invite from '../models/invite.model.js';
 import asynchandler from '../utility/asyncHandler.js';
+import { generateUniqueUsername } from '../utility/uniqueCode.js';
 
 const generateAccessAndRefreshTokens = async (userId) => {
   try {
@@ -26,7 +27,7 @@ const generateAccessAndRefreshTokens = async (userId) => {
 
 const verifyInviteCode = asynchandler(async (req, res, next) => {
   const { inviteCode } = req.body;
-  
+
   // Validate invite code
   if (!inviteCode) {
     return res.status(400).json({ message: 'Invite code is required' });
@@ -38,14 +39,22 @@ const verifyInviteCode = asynchandler(async (req, res, next) => {
     return res.status(404).json({ message: 'Invalid or Expired Invite Code' });
   }
 
-  return res
-    .status(200)
-    .json(new ApiResponse(200, { role: invite.role }, 'Invite code is valid'));
+  return res.status(200).json(new ApiResponse(200, { role: invite.role }, 'Invite code is valid'));
 });
 
 const registerUser = asynchandler(async (req, res) => {
-  const { inviteCode, fullName, email, password, adhar, phone, dateOfBirth, bloodGroup, grade } =
-    req.body;
+  const {
+    inviteCode,
+    firstName,
+    lastName,
+    email,
+    password,
+    adhar,
+    phone,
+    dateOfBirth,
+    bloodGroup,
+    grade,
+  } = req.body;
 
   // Validate invite code
   const invite = await Invite.findOne({ code: inviteCode });
@@ -54,7 +63,7 @@ const registerUser = asynchandler(async (req, res) => {
   }
 
   // Mandatory fields (base check)
-  if (!fullName || !email || !password || !adhar || !phone) {
+  if (!firstname || !email || !password || !adhar || !phone) {
     throw new ApiError(400, 'All fields are required');
   }
 
@@ -71,7 +80,10 @@ const registerUser = asynchandler(async (req, res) => {
 
   // Create user
   const user = await User.create({
-    fullName: fullName.toLowerCase().trim(),
+    firstName,
+    lastName,
+    fullName: `${firstName} ${lastName}`.trim(),
+    username: generateUniqueUsername(fullName, User),
     adhar,
     dateOfBirth: dateOfBirth || null,
     email: email.toLowerCase().trim(),
@@ -96,7 +108,9 @@ const registerUser = asynchandler(async (req, res) => {
   return res.status(201).json(new ApiResponse(201, 'User registered successfully', userObj));
 });
 
-const loginUser = asynchandler(async (req, res) => {});
+const loginUser = asynchandler(async (req, res) => {
+  const { username, email, password } = req.body;
+});
 
 const forgetPassword = asynchandler(async (req, res) => {});
 
