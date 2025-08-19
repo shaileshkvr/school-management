@@ -120,7 +120,7 @@ pnpm run dev
 
 ## 🗺 Roadmap
 
-- *Add Parent schema & APIs*
+- ***Add Parent schema & APIs***
 
 - **File upload (marksheets, documents)**
 
