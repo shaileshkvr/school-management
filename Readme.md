@@ -27,6 +27,7 @@ Supports **Students, Teachers, Parents, and Admins** with authentication, author
 ---
 
 ## 📂 Project Structure
+```plaintext
 /api/v1
 │
 ├── /auth → register, login, current user
@@ -37,6 +38,7 @@ Supports **Students, Teachers, Parents, and Admins** with authentication, author
 ├── /subjects → subject creation & management
 ├── /attendance → mark & fetch attendance
 └── /grades → assign & fetch student grades
+```
 
 ---
 
@@ -120,7 +122,7 @@ pnpm run dev
 
 ## 🗺 Roadmap
 
-- ***Add Parent schema & APIs***
+- **Add Parent schema & APIs**
 
 - **File upload (marksheets, documents)**
 
