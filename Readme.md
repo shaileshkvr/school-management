@@ -30,14 +30,15 @@ Supports **Students, Teachers, Parents, and Admins** with authentication, author
 ```plaintext
 /api/v1
 │
-├── /auth → register, login, current user
-├── /users → manage all users (admin only)
-├── /students → student-specific endpoints
-├── /teachers → teacher-specific endpoints
-├── /classes → class creation & management
-├── /subjects → subject creation & management
-├── /attendance → mark & fetch attendance
-└── /grades → assign & fetch student grades
+├── /auth        → register, login, current user
+├── /users       → manage all users (admin only)
+├── /students    → student-specific endpoints
+├── /teachers    → teacher-specific endpoints
+├── /classes     → class creation & management
+├── /subjects    → subject creation & management
+├── /attendance  → mark & fetch attendance
+└── /grades      → assign & fetch student grades
+
 ```
 
 ---
