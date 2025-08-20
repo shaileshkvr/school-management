@@ -18,7 +18,7 @@ app.use(cors({ origin: process.env.CORS_ORIGIN, credentials: true }));
 
 import authRouter from './routes/auth.routes.js';
 
-const apiVersion = '/api/v1';
+const apiVersion = 'school-management/api/v1';
 
 // Routes declarations
 
