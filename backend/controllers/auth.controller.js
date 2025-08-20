@@ -145,7 +145,27 @@ const loginUser = asynchandler(async (req, res) => {
     .json(new ApiResponse(200, { user: userObj }, 'Login successful'));
 });
 
-const forgetPassword = asynchandler(async (req, res) => {});
+const forgetPassword = asynchandler(async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    throw new ApiError(400, 'Email is required');
+  }
+  const user = await User.findOne({ email: email.toLowerCase().trim() });
+  if (!user) {
+    throw new ApiError(404, 'User not found with this email');
+  }
+
+  // Todo
+  /*
+  1. Generate reset token
+  2. Learn to use nodemailer to send emails (use alternate-personal email for now)
+  3. Match reset token with user
+  4. Reset password
+  5. Update user password and save
+  6. Send success response
+  7. Delete reset token after use
+  */
+});
 
 const getAccessToken = asynchandler(async (req, res) => {
   const refreshToken =

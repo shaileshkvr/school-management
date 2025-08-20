@@ -18,7 +18,7 @@ router.route('/register').post(registerUser);
 
 router.route('/login').post(loginUser);
 
-// router.route('/forgot-password').patch(forgetPassword);
+router.route('/forgot-password').post(verifyJwt, forgetPassword);
 
 // // Secured Routes
 
