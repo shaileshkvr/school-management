@@ -46,7 +46,7 @@ inviteSchema.virtual('isValid').get(function () {
   return this.isActive && this.usedCount < this.maxUses && this.expiresAt > new Date();
 });
 
-// Utility method -> mark code as used
+// utils method -> mark code as used
 inviteSchema.methods.markUsed = async function () {
   this.usedCount += 1;
   if (this.usedCount >= this.maxUses) {

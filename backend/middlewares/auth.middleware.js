@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/user.model.js';
-import ApiError from '../utility/ApiError.js';
-import asyncHandler from '../utility/asyncHandler.js';
+import ApiError from '../utils/ApiError.js';
+import asyncHandler from '../utils/asyncHandler.js';
 
 // _ is used to ignore unused parameters in asyncHandler
 

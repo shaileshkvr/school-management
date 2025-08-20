@@ -1,10 +1,10 @@
 import jwt from 'jsonwebtoken';
-import ApiError from '../utility/ApiError.js';
-import ApiResponse from '../utility/ApiResponse.js';
+import ApiError from '../utils/ApiError.js';
+import ApiResponse from '../utils/ApiResponse.js';
 import User from '../models/user.model.js';
 import Invite from '../models/invite.model.js';
-import asynchandler from '../utility/asyncHandler.js';
-import { generateUniqueUsername } from '../utility/uniqueCode.js';
+import asynchandler from '../utils/asyncHandler.js';
+import { generateUniqueUsername } from '../utils/uniqueCode.js';
 
 const cookieOptions = {
   httpOnly: true,
