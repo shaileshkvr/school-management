@@ -6,6 +6,12 @@ import Invite from '../models/invite.model.js';
 import asynchandler from '../utility/asyncHandler.js';
 import { generateUniqueUsername } from '../utility/uniqueCode.js';
 
+const cookieOptions = {
+  httpOnly: true,
+  secure: true,
+  sameSite: 'Strict',
+};
+
 const generateAccessAndRefreshTokens = async (userId) => {
   try {
     const user = await User.findById(userId);
@@ -131,24 +137,56 @@ const loginUser = asynchandler(async (req, res) => {
   delete userObj.refreshToken;
 
   const isProd = process.env.NODE_ENV === 'production';
-  const cookieOptions = {
-    httpOnly: true,
-    secure: isProd,
-    sameSite: 'Strict',
-  };
 
   return res
     .status(200)
     .cookie('refreshToken', refreshToken, { ...cookieOptions, maxAge: 7 * 24 * 60 * 60 * 1000 }) // days * hours * minutes * seconds * milliseconds
-    .cookie('accessToken', accessToken, cookieOptions)
+    .cookie('accessToken', accessToken, { ...cookieOptions, maxAge: 20 * 60 * 1000 }) // 15 minutes
     .json(new ApiResponse(200, { user: userObj }, 'Login successful'));
 });
 
 const forgetPassword = asynchandler(async (req, res) => {});
 
-// Authentication required
+const getAccessToken = asynchandler(async (req, res) => {
+  const refreshToken =
+    req.cookies?.refreshToken || req.header('Authorization')?.replace('Bearer ', '');
+  if (!refreshToken) {
+    throw new ApiError(401, 'Unauthorized Request');
+  }
+  try {
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
 
-const getAccessToken = asynchandler(async (req, res) => {});
+    const user = await User.findById(decoded?._id).select('-password -refreshToken');
+
+    if (!user) {
+      throw new ApiError(404, 'Unauthorized: Invalid Token');
+    }
+
+    if (user.refreshToken !== refreshToken) {
+      throw new ApiError(401, 'Unauthorized: Rerfresh token is expired');
+    }
+
+    const { accessToken, refreshToken: newRefreshToken } = await generateAccessAndRefreshTokens(
+      user._id
+    );
+    return res
+      .status(200)
+      .cookie('refreshToken', newRefreshToken, {
+        ...cookieOptions,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      })
+      .cookie('accessToken', accessToken, { ...cookieOptions, maxAge: 20 * 60 * 1000 })
+      .json(
+        new ApiResponse(
+          200,
+          { accessToken, refreshToken: newRefreshToken, user },
+          'Access token generated successfully'
+        )
+      );
+  } catch (error) {
+    throw new ApiError(401, error?.message || 'Unauthorized: Invalid or expired refresh token');
+  }
+});
 
 const resetPassword = asynchandler(async (req, res) => {});
 

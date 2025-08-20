@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import { upload } from '../middlewares/multer.middleware.js';
 import verifyJwt from '../middlewares/auth.middleware.js';
 import {
   verifyInviteCode,
@@ -23,10 +22,10 @@ router.route('/login').post(loginUser);
 
 // // Secured Routes
 
-// router.route('/get-access-token').get(getAccessToken);
+router.route('/access-token').post(getAccessToken);
 
-// router.route('/reset-password').patch(verifyJwt, resetPassword);
+// router.route('/reset-password').post(verifyJwt, resetPassword);
 
-// router.route('/logout').get(verifyJwt, logoutUser);
+// router.route('/logout').post(verifyJwt, logoutUser);
 
 export default router;
