@@ -17,19 +17,22 @@ app.use(cors({ origin: process.env.CORS_ORIGIN, credentials: true }));
 // Routes imports
 
 import authRouter from './routes/auth.routes.js';
+import testRouter from './routes/test.routes.js';
 
-const apiVersion = 'school-management/api/v1';
+const apiVersion = '/scmgt/api/v1';
 
 // Routes declarations
-
 app.use(`${apiVersion}/auth`, authRouter);
+
+// Test routes
+app.use(`${apiVersion}/test`, testRouter);
 
 // app.use(`${apiVersion}/users`, userRouter);
 // this will create a route like "https://localhost:<port>/api/v1/users/<controller method>"
 // the '/register' is comming from userRouter or 'user.routes.js' when you purposly hit '/register' request
 // similarly '/login' can also be created in user.routes.js file that will call its respective controller
 
-app.get('/', (req, res) =>
+app.get('/', (_, res) =>
   res.send({
     user: 'Shailesh Kr Verma',
     status: 'Server runnning, connected to db',
