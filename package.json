@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "workspaces": ["frontend","backend"],
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
   "scripts": {
     "dev": "concurrently \"pnpm --filter backend --parallel run dev\" \"pnpm --filter frontend --parallel run dev\"",
     "lint": "pnpm -w -r run lint",
@@ -19,5 +22,5 @@
   "keywords": [],
   "author": "Shailesh Kumar Verma",
   "license": "ISC",
-  "packageManager": "pnpm@10.14.0"
+  "packageManager": "pnpm@10.15.0"
 }
