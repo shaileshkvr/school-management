@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
-const ALLOWED_ROLES = ['student', 'teacher', 'parent', 'admin'];
+const ALLOWED_ROLES = ['student', 'teacher', 'admin'];
 
 const userSchema = new mongoose.Schema(
   {
@@ -11,7 +11,6 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       required: true,
       trim: true,
-      index: true,
       minlength: [3, 'First name must be at least 3 characters'],
       maxlength: [20, 'First name cannot exceed 20 characters'],
     },
@@ -24,7 +23,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true,
       required: true,
-      index: true,
       minlength: [3, 'Full name must be at least 3 characters'],
       maxlength: [50, 'Full name cannot exceed 50 characters'],
     },
@@ -35,23 +33,21 @@ const userSchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
       immutable: true,
-      index: true,
     },
     adhar: {
       type: String,
       required: true,
       unique: true,
       match: [/^\d{12}$/, 'Aadhaar must be exactly 12 digits'],
-      index: true,
     },
     dateOfBirth: {
       type: Date,
       required: function () {
-        return this.roles.includes('student') || this.roles.includes('parent');
+        return this.roles.includes('student');
       },
       validate: {
         validator: function (value) {
-          if (!value) return true; // allow empty for parents
+          if (!value) return true; // allow empty for teachers
           const ageDiff = Date.now() - value.getTime();
           const age = new Date(ageDiff).getUTCFullYear() - 1970;
           return age > 5 && age < 60;
@@ -61,14 +57,18 @@ const userSchema = new mongoose.Schema(
     },
     email: {
       type: String,
-      lowercase: true,
       trim: true,
+      lowercase: true,
       validate: {
         validator: function (v) {
           return /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(v || '');
         },
         message: 'Invalid email format',
       },
+    },
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
     },
     phone: {
       type: String,
@@ -90,7 +90,6 @@ const userSchema = new mongoose.Schema(
     roles: {
       type: [String],
       required: true,
-      index: true,
       validate: {
         validator: function (roles) {
           if (!roles.length) return false;
@@ -119,6 +118,8 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+userSchema.index({ fullName: 1, username: 1, adhar: 1, email: 1, grade: 1, roles: 1 });
 
 // Normalize roles before validation
 userSchema.pre('validate', function (next) {
