@@ -26,7 +26,7 @@ const sendMail = async (name, to, subject) => {
       html: templateEmail({
         user: name,
         purpose: 'test the email functionality',
-        url: 'https://www.google.com',
+        url: ``, // Todo: Frontend Path Here
         urlText: 'Go to Google',
         header: 'Test Email from School Management',
       }),

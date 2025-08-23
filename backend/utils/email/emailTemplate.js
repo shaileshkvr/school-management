@@ -10,7 +10,6 @@ const templateEmail = ({ header, user, purpose, url, urlText }) => `<!DOCTYPE ht
       margin: 0;
       padding: 0 20px;
       font-family: Arial, sans-serif;
-      background-color: #f4f6f9;
     "
   >
     <table
@@ -72,10 +71,7 @@ const templateEmail = ({ header, user, purpose, url, urlText }) => `<!DOCTYPE ht
                   >
                     Hi
                     <span
-                      style="
-                        font-family: 'Courier New', monospace;
-                        font-weight: bold;
-                      "
+                      style="font-weight: bold;"
                       >${user}</span
                     >,<br />
                     This mail was sent to you to ${purpose}.<br />

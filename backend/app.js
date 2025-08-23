@@ -19,15 +19,15 @@ app.use(cors({ origin: process.env.CORS_ORIGIN, credentials: true }));
 import authRouter from './routes/auth.routes.js';
 import testRouter from './routes/test.routes.js';
 
-const apiVersion = '/scmgt/api/v1';
+export const apiPath = '/scmgt/api/v1';
 
 // Routes declarations
-app.use(`${apiVersion}/auth`, authRouter);
+app.use(`${apiPath}/auth`, authRouter);
 
 // Test routes
-app.use(`${apiVersion}/test`, testRouter);
+app.use(`${apiPath}/test`, testRouter);
 
-// app.use(`${apiVersion}/users`, userRouter);
+// app.use(`${apiPath}/users`, userRouter);
 // this will create a route like "https://localhost:<port>/api/v1/users/<controller method>"
 // the '/register' is comming from userRouter or 'user.routes.js' when you purposly hit '/register' request
 // similarly '/login' can also be created in user.routes.js file that will call its respective controller
