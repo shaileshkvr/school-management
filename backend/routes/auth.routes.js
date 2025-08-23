@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import {verifyJwt} from '../middlewares/auth.middleware.js';
+import {verifyJwt, validateCode} from '../middlewares/auth.middleware.js';
 import {
   verifyInviteCode,
   registerUser,
@@ -18,7 +18,7 @@ router.route('/register').post(registerUser);
 
 router.route('/login').post(loginUser);
 
-router.route('/forgot-password').post(verifyJwt, forgetPassword);
+router.route('/forgot-password').post(forgetPassword);
 
 // // Secured Routes
 
