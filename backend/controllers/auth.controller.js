@@ -2,9 +2,9 @@ import jwt from 'jsonwebtoken';
 import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
 import User from '../models/user.model.js';
-import Invite from '../models/invite.model.js';
+import Token from '../models/token.model.js';
 import asynchandler from '../utils/asyncHandler.js';
-import { generateUniqueUsername } from '../utils/uniqueCode.js';
+import { generateUniqueCode, generateUniqueUsername } from '../utils/uniqueCode.js';
 
 const cookieOptions = {
   httpOnly: true,
@@ -31,51 +31,23 @@ const generateAccessAndRefreshTokens = async (userId) => {
   }
 };
 
-const verifyInviteCode = asynchandler(async (req, res, next) => {
-  const { inviteCode } = req.body;
-
-  // Validate invite code
-  if (!inviteCode) {
-    return res.status(400).json({ message: 'Invite code is required' });
-  }
-
-  const invite = await Invite.findOne({ code: inviteCode });
-
-  if (!invite || !invite.isActive) {
-    return res.status(404).json({ message: 'Invalid or Expired Invite Code' });
-  }
-
-  return res.status(200).json(new ApiResponse(200, { role: invite.role }, 'Invite code is valid'));
-});
-
 const registerUser = asynchandler(async (req, res) => {
-  const {
-    inviteCode,
-    firstName,
-    lastName,
-    email,
-    password,
-    adhar,
-    phone,
-    dateOfBirth,
-    bloodGroup,
-    grade,
-  } = req.body;
+  const { token } = req;
+  const { firstName, lastName, email, password, adhar, phone, dateOfBirth, bloodGroup, grade } =
+    req.body;
 
-  // Validate invite code
-  const invite = await Invite.findOne({ code: inviteCode });
-  if (!invite || !invite.isActive) {
+  if (!token || token.purpose !== 'invite') {
     throw new ApiError(400, 'Invalid or expired invite code');
   }
 
   // Mandatory fields (base check)
-  if (!firstname || !email || !password || !adhar || !phone) {
+  if (!firstName || !email || !password || !adhar || !phone) {
     throw new ApiError(400, 'All fields are required');
   }
 
   // Role-based check
-  if (invite.role === 'student' && (!grade || !dateOfBirth)) {
-    throw new ApiError(400, 'Both Date-of-birth and Grade are required for students');
+  if (token.role === 'student' && (!grade || !dateOfBirth)) {
+    throw new ApiError(400, 'Both Date-of-Birth and Grade are required for students');
   }
 
   // Aadhaar uniqueness
@@ -105,7 +77,7 @@ const registerUser = asynchandler(async (req, res) => {
   }
 
   // Mark invite as used
-  await invite.markUsed();
+  await invite.consume();
 
   // Cleanup sensitive fields
   const userObj = user.toObject();
@@ -155,16 +127,18 @@ const forgetPassword = asynchandler(async (req, res) => {
     throw new ApiError(404, 'User not found with this email');
   }
 
-  // Todo
-  /*
-  1. Generate reset token
-  2. Learn to use nodemailer to send emails (use alternate-personal email for now)
-  3. Match reset token with user
-  4. Reset password
-  5. Update user password and save
-  6. Send success response
-  7. Delete reset token after use
-  */
+  // Generate reset token and store in db
+  const resetToken = generateUniqueCode();
+  const token = await Token.create({
+    code: resetToken,
+    purpose: 'reset-password',
+    user: user._id,
+  });
+
+  if (!token) {
+    throw new ApiError(500, 'Something went wrong while generating reset token');
+  }
+  
 });
 
 const getAccessToken = asynchandler(async (req, res) => {
