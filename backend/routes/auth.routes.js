@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import {verifyJwt, validateCode} from '../middlewares/auth.middleware.js';
 import {
-  verifyInviteCode,
   registerUser,
   loginUser,
   getAccessToken,
@@ -11,8 +10,6 @@ import {
 } from '../controllers/auth.controller.js';
 
 const router = Router();
-
-router.route('/verify-invite-code').post(verifyInviteCode);
 
 router.route('/register').post(registerUser);
 

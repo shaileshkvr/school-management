@@ -16,20 +16,14 @@ const transPorter = nodemailer.createTransport({
   },
 });
 
-const sendMail = async (name, to, subject) => {
+const sendMail = async (name, to, subject, purpose) => {
   // sendMail function below comes from nodemailer
   try {
     const info = await transPorter.sendMail({
       to,
       from: `School Management <${process.env.EMAIL_USER}>`,
       subject,
-      html: templateEmail({
-        user: name,
-        purpose: 'test the email functionality',
-        url: ``, // Todo: Frontend Path Here
-        urlText: 'Go to Google',
-        header: 'Test Email from School Management',
-      }),
+      html: templateEmail(name, purpose),
     });
 
     return info;

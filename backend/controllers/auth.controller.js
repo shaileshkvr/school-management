@@ -1,9 +1,11 @@
 import jwt from 'jsonwebtoken';
 import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
+import asynchandler from '../utils/asyncHandler.js';
 import User from '../models/user.model.js';
 import Token from '../models/token.model.js';
-import asynchandler from '../utils/asyncHandler.js';
+import sendMail from '../utils/email/sendMail.js';
+import { purposeOptions } from '../utils/email/emailTemplate.js';
 import { generateUniqueCode, generateUniqueUsername } from '../utils/uniqueCode.js';
 
 const cookieOptions = {
@@ -138,7 +140,23 @@ const forgetPassword = asynchandler(async (req, res) => {
   if (!token) {
     throw new ApiError(500, 'Something went wrong while generating reset token');
   }
-  
+
+  //send email
+  try {
+    const info = await sendMail(
+      user.firstName,
+      user.email,
+      'Action Required: Reset Your Password',
+      purposeOptions.reset
+    );
+
+    return res.status(200).json(new ApiResponse(400, 'Email sent successfully', info));
+  } catch (error) {
+    throw new ApiError(
+      500,
+      error.message || 'Something went wrong while sending reset-password email'
+    );
+  }
 });
 
 const getAccessToken = asynchandler(async (req, res) => {
@@ -187,7 +205,6 @@ const resetPassword = asynchandler(async (req, res) => {});
 const logoutUser = asynchandler(async (req, res) => {});
 
 export {
-  verifyInviteCode,
   registerUser,
   loginUser,
   forgetPassword,

@@ -32,7 +32,7 @@ app.use(`${apiPath}/test`, testRouter);
 // the '/register' is comming from userRouter or 'user.routes.js' when you purposly hit '/register' request
 // similarly '/login' can also be created in user.routes.js file that will call its respective controller
 
-app.get('/', (_, res) =>
+app.get(`${apiPath}/`, (_, res) =>
   res.send({
     user: 'Shailesh Kr Verma',
     status: 'Server runnning, connected to db',
