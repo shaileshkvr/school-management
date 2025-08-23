@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/user.model.js';
+import Token from '../models/token.model.js';
 import ApiError from '../utils/ApiError.js';
 import asyncHandler from '../utils/asyncHandler.js';
 
@@ -31,4 +32,20 @@ const verifyJwt = asyncHandler(async (req, _, next) => {
   }
 });
 
-export { verifyJwt };
+const validateCode = asyncHandler(async (req, _, next) => {
+  const { code } = req.body;
+
+  if (!code) {
+    throw new ApiError(400, 'Code is required');
+  }
+
+  const token = await Token.findOne({ code });
+  if (!token) {
+    throw new ApiError(404, 'Invalid or Expired Code');
+  }
+
+  req.token = token;
+  next();
+});
+
+export { verifyJwt, validateCode };
