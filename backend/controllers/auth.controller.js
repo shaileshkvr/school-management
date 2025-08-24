@@ -143,14 +143,14 @@ const forgetPassword = asynchandler(async (req, res) => {
 
   //send email
   try {
-    const info = await sendMail(
+    await sendMail(
       user.firstName,
       user.email,
       'Action Required: Reset Your Password',
       purposeOptions.reset
     );
 
-    return res.status(200).json(new ApiResponse(400, 'Email sent successfully', info));
+    return res.status(200).json(new ApiResponse(400, 'Email sent successfully'));
   } catch (error) {
     throw new ApiError(
       500,
@@ -204,11 +204,4 @@ const resetPassword = asynchandler(async (req, res) => {});
 
 const logoutUser = asynchandler(async (req, res) => {});
 
-export {
-  registerUser,
-  loginUser,
-  forgetPassword,
-  logoutUser,
-  resetPassword,
-  getAccessToken,
-};
+export { registerUser, loginUser, forgetPassword, logoutUser, resetPassword, getAccessToken };
