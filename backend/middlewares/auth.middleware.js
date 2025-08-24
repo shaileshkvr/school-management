@@ -36,12 +36,12 @@ const validateCode = asyncHandler(async (req, _, next) => {
   const { code } = req.body;
 
   if (!code) {
-    throw new ApiError(400, 'Code is required');
+    throw new ApiError(400, 'Invalid link or Missing token');
   }
 
   const token = await Token.findOne({ code });
   if (!token) {
-    throw new ApiError(404, 'Invalid or Expired Code');
+    throw new ApiError(404, 'Invalid or Expired token');
   }
 
   req.token = token;

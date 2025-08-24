@@ -21,7 +21,7 @@ router.route('/forgot-password').post(forgetPassword);
 
 router.route('/access-token').post(getAccessToken);
 
-// router.route('/reset-password').post(verifyJwt, resetPassword);
+router.route('/reset-password').patch(verifyJwt, validateCode, resetPassword);
 
 // router.route('/logout').post(verifyJwt, logoutUser);
 

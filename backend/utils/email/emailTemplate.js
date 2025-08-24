@@ -32,7 +32,7 @@ const templates = {
     </span>`,
   },
   'reset-success': {
-    header: 'Action Required: Your Password Has Changed',
+    header: 'Your Password Has Changed',
     message: `You recently requested to reset the password for your account.
     To complete this action, click the link below.`,
     url: 'https://www.google.com',

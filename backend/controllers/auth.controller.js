@@ -200,7 +200,46 @@ const getAccessToken = asynchandler(async (req, res) => {
   }
 });
 
-const resetPassword = asynchandler(async (req, res) => {});
+const resetPassword = asynchandler(async (req, res) => {
+  const { user, token } = req;
+  const { oldPassword, newPassword, confirmPassword } = req.body;
+
+  if (token.purpose !== 'reset-password') {
+    throw new ApiError(400, 'Invalid or expired reset token');
+  }
+  if (!oldPassword || !newPassword || !confirmPassword) {
+    throw new ApiError(400, 'All fields are required');
+  }
+  if (confirmPassword !== newPassword) {
+    throw new ApiError(400, 'Passwords do not match');
+  }
+
+  const passwordMatch = user.comparePassword(oldPassword);
+  if (!passwordMatch) {
+    throw new ApiError(400, 'Incorrect Password');
+  }
+
+  try {
+    user.password = confirmPassword;
+    await user.save({ validateBeforeSave: false });
+
+    //send updation email
+    await sendMail(
+      user.firstName,
+      user.email,
+      'Action Required: Password Changed',
+      purposeOptions.resetSuccess
+    );
+    
+    return res.status(200).json(new ApiResponse(400, 'Password changed successfully.'));
+  } catch (error) {
+    throw new ApiError(
+      500,
+      error.message || 'Something went wrong while changing password or sending reset-password email'
+    );
+  }
+
+});
 
 const logoutUser = asynchandler(async (req, res) => {});
 
