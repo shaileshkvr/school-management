@@ -1,9 +1,6 @@
 import nodemailer from 'nodemailer';
 import ApiError from '../ApiError.js';
 import templateEmail from './emailTemplate.js';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 // this transporter is used to send emails, he is the postman
 const transPorter = nodemailer.createTransport({

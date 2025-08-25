@@ -71,7 +71,7 @@ const registerUser = asynchandler(async (req, res) => {
     bloodGroup: bloodGroup || '',
     password,
     grade: grade || null,
-    roles: [invite.role],
+    roles: [token.role],
   });
 
   if (!user) {
@@ -79,7 +79,7 @@ const registerUser = asynchandler(async (req, res) => {
   }
 
   // Mark invite as used
-  await invite.consume();
+  await token.consume();
 
   // Cleanup sensitive fields
   const userObj = user.toObject();
@@ -230,15 +230,15 @@ const resetPassword = asynchandler(async (req, res) => {
       'Action Required: Password Changed',
       purposeOptions.resetSuccess
     );
-    
+
     return res.status(200).json(new ApiResponse(400, 'Password changed successfully.'));
   } catch (error) {
     throw new ApiError(
       500,
-      error.message || 'Something went wrong while changing password or sending reset-password email'
+      error.message ||
+        'Something went wrong while changing password or sending reset-password email'
     );
   }
-
 });
 
 const logoutUser = asynchandler(async (req, res) => {});

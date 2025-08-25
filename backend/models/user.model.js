@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema(
       trim: true,
       minlength: [3, 'First name must be at least 3 characters'],
       maxlength: [20, 'First name cannot exceed 20 characters'],
+      index: true,
     },
     lastName: {
       type: String,
@@ -33,12 +34,14 @@ const userSchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
       immutable: true,
+      index: true,
     },
     adhar: {
       type: String,
       required: true,
       unique: true,
       match: [/^\d{12}$/, 'Aadhaar must be exactly 12 digits'],
+      index: true,
     },
     dateOfBirth: {
       type: Date,
@@ -65,6 +68,7 @@ const userSchema = new mongoose.Schema(
         },
         message: 'Invalid email format',
       },
+      index: true,
     },
     isEmailVerified: {
       type: Boolean,
@@ -77,7 +81,7 @@ const userSchema = new mongoose.Schema(
     },
     bloodGroup: {
       type: String,
-      enum: ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'],
+      enum: ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-', ''],
     },
     grade: {
       type: Number,
@@ -86,6 +90,7 @@ const userSchema = new mongoose.Schema(
       required: function () {
         return this.roles.includes('student');
       },
+      index: true,
     },
     roles: {
       type: [String],
@@ -98,6 +103,7 @@ const userSchema = new mongoose.Schema(
         },
         message: 'Invalid role combination',
       },
+      index: true,
     },
     password: {
       type: String,
@@ -118,8 +124,6 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
-userSchema.index({ fullName: 1, username: 1, adhar: 1, email: 1, grade: 1, roles: 1 });
 
 // Normalize roles before validation
 userSchema.pre('validate', function (next) {
