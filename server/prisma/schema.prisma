@@ -1,0 +1,136 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+}
+
+enum FeeStatus {
+  PAID
+  UNPAID
+}
+
+enum TeacherGroup {
+  PRIMARY
+  SECONDARY
+  SENIOR_SECONDARY
+}
+
+enum Specialization {
+  ART
+  MUSIC
+  SPORTS
+  COMPUTER_SCIENCE
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(STUDENT)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  studentProfile StudentProfile?
+  teacherProfile TeacherProfile?
+
+  notificationsPosted Notification[]
+}
+
+model StudentProfile {
+  id          String @id @default(uuid())
+  userId      String @unique
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  classId     String
+  class       Class  @relation(fields: [classId], references: [id])
+  admissionNo String @unique
+  parentName  String
+  parentPhone String
+
+  attendance Attendance[]
+  fees       Fee[]
+  examScores ExamScore[]
+}
+
+model TeacherProfile {
+  id             String       @id @default(uuid())
+  userId         String       @unique
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  employeeId     String       @unique
+  group          TeacherGroup
+  specialization String       @default("None")
+
+  classesLed Class[]
+}
+
+model Class {
+  id        String          @id @default(uuid())
+  name      String          @unique
+  teacherId String?
+  teacher   TeacherProfile? @relation(fields: [teacherId], references: [id])
+
+  students StudentProfile[]
+}
+
+model Attendance {
+  id        String           @id @default(uuid())
+  studentId String
+  student   StudentProfile   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  date      DateTime         @db.Date
+  status    AttendanceStatus
+  // Prevents duplicate marking for a student on same day
+
+  @@unique([studentId, date])
+}
+
+model Fee {
+  id             String         @id @default(uuid())
+  studentId      String
+  student        StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  amount         Decimal
+  dueDate        DateTime
+  status         FeeStatus      @default(UNPAID)
+  paymentDetails Json?
+  // JSONB to capture dummy gateway logs
+}
+
+model Subject {
+  id         String      @id @default(uuid())
+  name       String      @unique
+  // e.g. "Mathematics", "Science"
+  examScores ExamScore[]
+}
+
+model ExamScore {
+  id        String         @id @default(uuid())
+  studentId String
+  student   StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  subjectId String
+  subject   Subject        @relation(fields: [subjectId], references: [id])
+  score     Decimal
+  maxScore  Decimal
+  date      DateTime
+}
+
+model Notification {
+  id          String   @id @default(uuid())
+  title       String
+  message     String
+  classId     String? // Null means global notice board
+  createdAt   DateTime @default(now())
+  createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id])
+}

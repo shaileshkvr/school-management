@@ -1,0 +1,36 @@
+services:
+
+  # Frontend service
+  client: 
+    build: ./client
+    ports:
+      - "9090:9090" # Exposes frontend to host at http://localhost:9090
+
+  # Backend service
+  server:
+    build: ./server
+    ports:
+      - "9091:9091" # Exposes backend to host at http://localhost:9091
+    depends_on:
+      - school-postgres
+    environment:
+      # CRITICAL: Backend container connects to Postgres using container port (5432) 
+      # and the service name (school-postgres) as the hostname.
+      # If running backend outside of docker (locally on host), use localhost:9099.
+      - DATABASE_URL=postgresql://admin:myschoolpostgres@school-postgres:5432/school_management?schema=public
+
+  # Database service
+  school-postgres:
+    image: postgres:18.4-alpine # Using standard, highly supported Postgres alpine image
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: myschoolpostgres
+      POSTGRES_DB: school_management # Explicitly names the default database
+    ports:
+      - "9099:5432" # Maps container port 5432 to host port 9099 (for pgAdmin/DBeaver on host)
+    volumes:
+      - postgres_data:/var/lib/postgresql # Mounts named volume to persist DB state for PG18+
+
+# Named volumes are managed by Docker and persist even if containers are deleted/rebuilt
+volumes:
+  postgres_data:
