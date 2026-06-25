@@ -21,12 +21,14 @@ enum AttendanceStatus {
 enum FeeStatus {
   PAID
   UNPAID
+  PARTIAL
 }
 
 enum TeacherGroup {
   PRIMARY
   SECONDARY
   SENIOR_SECONDARY
+  SPECIAL
 }
 
 enum Specialization {
@@ -71,7 +73,6 @@ model TeacherProfile {
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   employeeId     String       @unique
   group          TeacherGroup
-  specialization String       @default("None")
 
   classesLed Class[]
 }
