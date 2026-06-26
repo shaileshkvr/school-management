@@ -3,3 +3,7 @@ node_modules
 .env
 
 /generated/prisma
+
+# Compiled JavaScript and source maps
+**/*.js
+**/*.js.map
