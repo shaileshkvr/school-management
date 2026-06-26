@@ -101,7 +101,7 @@ cd ../client
 pnpm install
 pnpm run dev
 ```
-The client will be running on `http://localhost:5173`.
+The client will be running on `http://localhost:9090`.
 
 ---
 
