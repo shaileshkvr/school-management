@@ -1,11 +1,11 @@
-import type { Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import type { Response } from "express";
 import { prisma } from "../config/db.js";
 import type { AuthenticatedRequest } from "../middleware/auth.js";
 
-const JWT_SECRET = process.env.JWT_SECRET || "super_secret_key";
 const NODE_ENV = process.env.NODE_ENV || "development";
+const JWT_SECRET = process.env.JWT_SECRET || "super_secret_key";
 
 export async function login(req: AuthenticatedRequest, res: Response) {
   const { email, password } = req.body;
@@ -20,14 +20,17 @@ export async function login(req: AuthenticatedRequest, res: Response) {
     });
 
     if (!user) {
+      // Keeping message generic to avoid revealing whether the email exists in the system
       return res.status(401).json({ error: "Invalid email or password." });
     }
 
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) {
+      // Keeping message generic to avoid revealing whether the email exists in the system
       return res.status(401).json({ error: "Invalid email or password." });
     }
 
+    // Generate JWT token
     const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, {
       expiresIn: "7d",
     });
@@ -36,7 +39,9 @@ export async function login(req: AuthenticatedRequest, res: Response) {
       httpOnly: true,
       secure: NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      // Set cookie to expire in 7 days
+      // Days * Hours * Minutes * Seconds * Milliseconds
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     return res.json({
