@@ -5,7 +5,16 @@ CREATE TYPE "Role" AS ENUM ('ADMIN', 'TEACHER', 'STUDENT');
 CREATE TYPE "AttendanceStatus" AS ENUM ('PRESENT', 'ABSENT', 'LATE');
 
 -- CreateEnum
-CREATE TYPE "FeeStatus" AS ENUM ('PAID', 'UNPAID');
+CREATE TYPE "FeeStatus" AS ENUM ('PAID', 'UNPAID', 'PARTIAL');
+
+-- CreateEnum
+CREATE TYPE "TeacherGroup" AS ENUM ('PRIMARY', 'SECONDARY', 'SENIOR_SECONDARY', 'SPECIAL');
+
+-- CreateEnum
+CREATE TYPE "Specialization" AS ENUM ('ART', 'MUSIC', 'SPORTS', 'COMPUTER_SCIENCE');
+
+-- CreateEnum
+CREATE TYPE "Gender" AS ENUM ('MALE', 'FEMALE', 'OTHER');
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -27,6 +36,8 @@ CREATE TABLE "StudentProfile" (
     "admissionNo" TEXT NOT NULL,
     "parentName" TEXT NOT NULL,
     "parentPhone" TEXT NOT NULL,
+    "gender" "Gender" NOT NULL,
+    "birthDate" DATE NOT NULL,
 
     CONSTRAINT "StudentProfile_pkey" PRIMARY KEY ("id")
 );
@@ -36,7 +47,9 @@ CREATE TABLE "TeacherProfile" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "employeeId" TEXT NOT NULL,
-    "specialization" TEXT NOT NULL,
+    "group" "TeacherGroup" NOT NULL,
+    "gender" "Gender" NOT NULL,
+    "birthDate" DATE NOT NULL,
 
     CONSTRAINT "TeacherProfile_pkey" PRIMARY KEY ("id")
 );
@@ -85,6 +98,7 @@ CREATE TABLE "ExamScore" (
     "id" TEXT NOT NULL,
     "studentId" TEXT NOT NULL,
     "subjectId" TEXT NOT NULL,
+    "examName" TEXT NOT NULL,
     "score" DECIMAL(65,30) NOT NULL,
     "maxScore" DECIMAL(65,30) NOT NULL,
     "date" TIMESTAMP(3) NOT NULL,
@@ -98,6 +112,7 @@ CREATE TABLE "Notification" (
     "title" TEXT NOT NULL,
     "message" TEXT NOT NULL,
     "classId" TEXT,
+    "targetUserId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "createdById" TEXT NOT NULL,
 
@@ -151,6 +166,9 @@ ALTER TABLE "ExamScore" ADD CONSTRAINT "ExamScore_studentId_fkey" FOREIGN KEY ("
 
 -- AddForeignKey
 ALTER TABLE "ExamScore" ADD CONSTRAINT "ExamScore_subjectId_fkey" FOREIGN KEY ("subjectId") REFERENCES "Subject"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Notification" ADD CONSTRAINT "Notification_targetUserId_fkey" FOREIGN KEY ("targetUserId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Notification" ADD CONSTRAINT "Notification_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
