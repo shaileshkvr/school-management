@@ -38,6 +38,12 @@ enum Specialization {
   COMPUTER_SCIENCE
 }
 
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
 model User {
   id           String   @id @default(uuid())
   email        String   @unique
@@ -49,18 +55,21 @@ model User {
   studentProfile StudentProfile?
   teacherProfile TeacherProfile?
 
-  notificationsPosted Notification[]
+  notificationsPosted   Notification[] @relation("CreatedNotifications")
+  notificationsReceived Notification[] @relation("UserNotifications")
 }
 
 model StudentProfile {
-  id          String @id @default(uuid())
-  userId      String @unique
-  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   classId     String
-  class       Class  @relation(fields: [classId], references: [id])
-  admissionNo String @unique
+  class       Class    @relation(fields: [classId], references: [id])
+  admissionNo String   @unique
   parentName  String
   parentPhone String
+  gender      Gender
+  birthDate   DateTime @db.Date
 
   attendance Attendance[]
   fees       Fee[]
@@ -68,11 +77,13 @@ model StudentProfile {
 }
 
 model TeacherProfile {
-  id             String       @id @default(uuid())
-  userId         String       @unique
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  employeeId     String       @unique
-  group          TeacherGroup
+  id         String       @id @default(uuid())
+  userId     String       @unique
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  employeeId String       @unique
+  group      TeacherGroup
+  gender     Gender
+  birthDate  DateTime     @db.Date
 
   classesLed Class[]
 }
@@ -121,17 +132,20 @@ model ExamScore {
   student   StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
   subjectId String
   subject   Subject        @relation(fields: [subjectId], references: [id])
+  examName  String
   score     Decimal
   maxScore  Decimal
   date      DateTime
 }
 
 model Notification {
-  id          String   @id @default(uuid())
-  title       String
-  message     String
-  classId     String? // Null means global notice board
-  createdAt   DateTime @default(now())
-  createdById String
-  createdBy   User     @relation(fields: [createdById], references: [id])
+  id           String   @id @default(uuid())
+  title        String
+  message      String
+  classId      String? // Null means global notice board
+  targetUserId String? // Null means class-wide or global notice
+  targetUser   User?    @relation("UserNotifications", fields: [targetUserId], references: [id])
+  createdAt    DateTime @default(now())
+  createdById  String
+  createdBy    User     @relation("CreatedNotifications", fields: [createdById], references: [id])
 }
