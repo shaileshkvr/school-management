@@ -1,4 +1,7 @@
+import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import pg from "pg";
 import { seedAdmin } from "./seeders/admin.js";
 import { seedSubjects } from "./seeders/subjects.js";
 import { seedClasses } from "./seeders/classes.js";
@@ -9,7 +12,9 @@ import { seedFees } from "./seeders/fees.js";
 import { seedNotifications } from "./seeders/notifications.js";
 import { seedExamScores } from "./seeders/scores.js";
 
-const prisma = new PrismaClient();
+const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
   console.log("Starting modular database seeding...");
@@ -49,4 +54,5 @@ main()
   })
   .finally(async () => {
     await prisma.$disconnect();
+    await pool.end();
   });
