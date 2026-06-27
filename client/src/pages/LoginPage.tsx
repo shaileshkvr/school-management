@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext.js";
 import { useNavigate } from "react-router-dom";
+import { Eye, EyeOff, Sun, Moon } from "lucide-react";
 
 export const LoginPage: React.FC = () => {
   const { login, error } = useAuth();
@@ -47,7 +48,7 @@ export const LoginPage: React.FC = () => {
           onClick={handleThemeToggle}
           title="Toggle Dark Mode"
         >
-          {isDark ? "☀️" : "🌙"}
+          {isDark ? <Sun size={18} /> : <Moon size={18} />}
         </button>
       </div>
 
@@ -89,7 +90,7 @@ export const LoginPage: React.FC = () => {
                 onClick={() => setShowPassword(!showPassword)}
                 title={showPassword ? "Hide password" : "Show password"}
               >
-                {showPassword ? "🙈" : "👁️"}
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
           </div>

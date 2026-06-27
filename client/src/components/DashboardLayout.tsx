@@ -1,6 +1,7 @@
 import React from "react";
 import { useAuth } from "../context/AuthContext.js";
 import { Link, useLocation } from "react-router-dom";
+import { Sun, Moon } from "lucide-react";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -92,7 +93,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
               title="Toggle Dark Mode"
               style={{ marginRight: "0.5rem" }}
             >
-              {isDark ? "☀️" : "🌙"}
+              {isDark ? <Sun size={18} /> : <Moon size={18} />}
             </button>
             <span className="role-badge">{user?.role}</span>
             <span>{user?.email}</span>

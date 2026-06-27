@@ -1,19 +1,19 @@
 :root {
-  /* Light Mode (Default: Cream-white & Classic Blue) */
-  --bg-primary: #FAF7F2;      /* Elegant warm cream-white */
-  --bg-secondary: #FFFFFF;    /* Pure white */
-  --bg-glass: rgba(255, 255, 255, 0.85);
-  --bg-input: #FFFFFF;
+  /* Light Mode (Cozy Premium Warm Ivory & Royal Blue) */
+  --bg-primary: #F4EFE6;      /* Soft warm ivory / book paper */
+  --bg-secondary: #FAF6EE;    /* Warm cream-white */
+  --bg-glass: rgba(250, 246, 238, 0.9);
+  --bg-input: #FFFFFF;        /* Crisp white inputs for readability */
   --bg-notice: rgba(30, 64, 175, 0.04);
-  --border-glass: rgba(0, 0, 0, 0.08);
-  --text-primary: #0f172a;    /* slate-900 */
-  --text-secondary: #475569;  /* slate-600 */
+  --border-glass: rgba(112, 101, 86, 0.15); /* Soft taupe border */
+  --text-primary: #2C251E;    /* Deep warm brown-black */
+  --text-secondary: #706556;  /* Cozy taupe-gray */
   --color-brand: #1e40af;     /* Rich classic blue */
   --color-brand-glow: rgba(30, 64, 175, 0.15);
-  --color-success: #059669;
-  --color-danger: #dc2626;
-  --color-warning: #d97706;
-  --shadow-main: 0 10px 30px -5px rgba(0, 0, 0, 0.05), 0 4px 12px -2px rgba(0, 0, 0, 0.03);
+  --color-success: #15803d;
+  --color-danger: #b91c1c;
+  --color-warning: #b45309;
+  --shadow-main: 0 10px 30px -5px rgba(44, 37, 30, 0.06), 0 4px 12px -2px rgba(44, 37, 30, 0.03);
   --font-family: 'Inter', -apple-system, sans-serif;
   --transition-smooth: all 0.25s cubic-bezier(0.23, 1, 0.32, 1);
 }
