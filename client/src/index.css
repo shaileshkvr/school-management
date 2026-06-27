@@ -1,19 +1,19 @@
 :root {
-  /* Light Mode (Cozy Premium Warm Ivory & Royal Blue) */
-  --bg-primary: #F4EFE6;      /* Soft warm ivory / book paper */
-  --bg-secondary: #FAF6EE;    /* Warm cream-white */
-  --bg-glass: rgba(250, 246, 238, 0.9);
+  /* Light Mode (Coffee Themed: Warm White, Coffee Brown, Dark Brown, Black) */
+  --bg-primary: #FAF6F0;      /* Warm white / milky froth */
+  --bg-secondary: #F5ECE1;    /* Soft macchiato / cream */
+  --bg-glass: rgba(245, 236, 225, 0.95);
   --bg-input: #FFFFFF;        /* Crisp white inputs for readability */
-  --bg-notice: rgba(30, 64, 175, 0.04);
-  --border-glass: rgba(112, 101, 86, 0.15); /* Soft taupe border */
-  --text-primary: #2C251E;    /* Deep warm brown-black */
-  --text-secondary: #706556;  /* Cozy taupe-gray */
-  --color-brand: #1e40af;     /* Rich classic blue */
-  --color-brand-glow: rgba(30, 64, 175, 0.15);
-  --color-success: #15803d;
-  --color-danger: #b91c1c;
-  --color-warning: #b45309;
-  --shadow-main: 0 10px 30px -5px rgba(44, 37, 30, 0.06), 0 4px 12px -2px rgba(44, 37, 30, 0.03);
+  --bg-notice: rgba(140, 94, 60, 0.06); /* Coffee-tinted notice card */
+  --border-glass: rgba(78, 54, 41, 0.15); /* Soft dark-brown border */
+  --text-primary: #1C1510;    /* Black-coffee near-black for body text */
+  --text-secondary: #70533C;  /* Warm medium coffee-brown */
+  --color-brand: #8C5E3C;     /* Coffee brown accent */
+  --color-brand-glow: rgba(140, 94, 60, 0.15);
+  --color-success: #2E7D32;
+  --color-danger: #C62828;
+  --color-warning: #EF6C00;
+  --shadow-main: 0 10px 30px -5px rgba(78, 54, 41, 0.08), 0 4px 12px -2px rgba(78, 54, 41, 0.04);
   --font-family: 'Inter', -apple-system, sans-serif;
   --transition-smooth: all 0.25s cubic-bezier(0.23, 1, 0.32, 1);
 }
