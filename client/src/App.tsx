@@ -6,6 +6,23 @@ import { AdminDashboard } from "./pages/AdminDashboard.js";
 import { TeacherDashboard } from "./pages/TeacherDashboard.js";
 import { StudentDashboard } from "./pages/StudentDashboard.js";
 
+// Admin Subpages
+import { ManageClasses } from "./pages/admin/ManageClasses.js";
+import { ManageTeachers } from "./pages/admin/ManageTeachers.js";
+import { ManageStudents } from "./pages/admin/ManageStudents.js";
+import { FeesRegistry } from "./pages/admin/FeesRegistry.js";
+import { PostAnnouncements } from "./pages/admin/PostAnnouncements.js";
+
+// Teacher Subpages
+import { MarkAttendance } from "./pages/teacher/MarkAttendance.js";
+import { EnterScores } from "./pages/teacher/EnterScores.js";
+import { ClassNoticeBoard } from "./pages/teacher/ClassNoticeBoard.js";
+
+// Student Subpages
+import { MyAttendance } from "./pages/student/MyAttendance.js";
+import { MyGrades } from "./pages/student/MyGrades.js";
+import { MyFees } from "./pages/student/MyFees.js";
+
 // Page loader component
 const PageLoader: React.FC = () => (
   <div style={{
@@ -69,6 +86,46 @@ const AppContent: React.FC = () => {
           }
         />
         <Route
+          path="/admin/classes"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <ManageClasses />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/teachers"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <ManageTeachers />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/students"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <ManageStudents />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/fees"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <FeesRegistry />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/notices"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <PostAnnouncements />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/teacher"
           element={
             <ProtectedRoute allowedRoles={["TEACHER"]}>
@@ -77,10 +134,58 @@ const AppContent: React.FC = () => {
           }
         />
         <Route
+          path="/teacher/attendance"
+          element={
+            <ProtectedRoute allowedRoles={["TEACHER"]}>
+              <MarkAttendance />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/teacher/grades"
+          element={
+            <ProtectedRoute allowedRoles={["TEACHER"]}>
+              <EnterScores />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/teacher/notices"
+          element={
+            <ProtectedRoute allowedRoles={["TEACHER"]}>
+              <ClassNoticeBoard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/student"
           element={
             <ProtectedRoute allowedRoles={["STUDENT"]}>
               <StudentDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/student/attendance"
+          element={
+            <ProtectedRoute allowedRoles={["STUDENT"]}>
+              <MyAttendance />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/student/grades"
+          element={
+            <ProtectedRoute allowedRoles={["STUDENT"]}>
+              <MyGrades />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/student/fees"
+          element={
+            <ProtectedRoute allowedRoles={["STUDENT"]}>
+              <MyFees />
             </ProtectedRoute>
           }
         />
