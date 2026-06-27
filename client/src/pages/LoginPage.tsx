@@ -6,8 +6,23 @@ export const LoginPage: React.FC = () => {
   const { login, error } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains("dark"));
+  
   const navigate = useNavigate();
+
+  const handleThemeToggle = () => {
+    const newDark = !isDark;
+    setIsDark(newDark);
+    if (newDark) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,10 +38,22 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="auth-container">
+    <div className="auth-container" style={{ position: "relative" }}>
+      {/* Top Right Theme Toggle */}
+      <div style={{ position: "absolute", top: "1.5rem", right: "1.5rem" }}>
+        <button 
+          type="button" 
+          className="theme-toggle-btn" 
+          onClick={handleThemeToggle}
+          title="Toggle Dark Mode"
+        >
+          {isDark ? "☀️" : "🌙"}
+        </button>
+      </div>
+
       <div className="auth-card">
         <div className="auth-header">
-          <h2>Welcome Back</h2>
+          <h2>Welcome</h2>
           <p>Login to access your dashboard</p>
         </div>
 
@@ -47,15 +74,24 @@ export const LoginPage: React.FC = () => {
 
           <div className="form-group">
             <label className="form-label">Password</label>
-            <input
-              type="password"
-              className="form-control"
-              // placeholder="••••••••"
-              placeholder="* * * * *"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <div className="password-field-container">
+              <input
+                type={showPassword ? "text" : "password"}
+                className="form-control password-input"
+                placeholder="* * * * *"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <button
+                type="button"
+                className="password-toggle-btn"
+                onClick={() => setShowPassword(!showPassword)}
+                title={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? "🙈" : "👁️"}
+              </button>
+            </div>
           </div>
 
           <button

@@ -9,6 +9,19 @@ interface DashboardLayoutProps {
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const { user, logout } = useAuth();
   const location = useLocation();
+  const [isDark, setIsDark] = React.useState(() => document.documentElement.classList.contains("dark"));
+
+  const handleThemeToggle = () => {
+    const newDark = !isDark;
+    setIsDark(newDark);
+    if (newDark) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  };
 
   const getNavLinks = () => {
     if (!user) return [];
@@ -72,6 +85,15 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
         <header className="header">
           <h2>Overview</h2>
           <div className="header-user">
+            <button 
+              type="button" 
+              className="theme-toggle-btn" 
+              onClick={handleThemeToggle}
+              title="Toggle Dark Mode"
+              style={{ marginRight: "0.5rem" }}
+            >
+              {isDark ? "☀️" : "🌙"}
+            </button>
             <span className="role-badge">{user?.role}</span>
             <span>{user?.email}</span>
           </div>
