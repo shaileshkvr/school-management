@@ -164,13 +164,29 @@ export async function getNotices(req: AuthenticatedRequest, res: Response) {
 }
 
 export async function createNotice(req: AuthenticatedRequest, res: Response) {
-  const { title, message, classId } = req.body;
+  const { title, message, classId, classIds } = req.body;
 
   if (!title || !message) {
     return res.status(400).json({ error: "Title and message are required." });
   }
 
   try {
+    if (Array.isArray(classIds) && classIds.length > 0) {
+      const notices = await Promise.all(
+        classIds.map((id) =>
+          prisma.notification.create({
+            data: {
+              title,
+              message,
+              classId: id,
+              createdById: req.user!.userId,
+            },
+          })
+        )
+      );
+      return res.status(201).json(notices[0]);
+    }
+
     const notice = await prisma.notification.create({
       data: {
         title,
