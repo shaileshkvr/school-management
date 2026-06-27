@@ -5,9 +5,10 @@ import { Sun, Moon } from "lucide-react";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
+  title?: string;
 }
 
-export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
+export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, title }) => {
   const { user, logout } = useAuth();
   const location = useLocation();
   const [isDark, setIsDark] = React.useState(() => document.documentElement.classList.contains("dark"));
@@ -84,7 +85,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
 
       <main className="main-content">
         <header className="header">
-          <h2>Overview</h2>
+          <h2>{title || "Overview"}</h2>
           <div className="header-user">
             <button 
               type="button" 
