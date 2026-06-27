@@ -1,0 +1,24 @@
+FROM node:20-alpine
+
+# Install pnpm
+RUN npm install -g pnpm
+
+WORKDIR /app
+
+# Copy lockfile and package configuration
+COPY package.json pnpm-lock.yaml ./
+
+# Install dependencies (cached in Docker layers)
+RUN pnpm install
+
+# Copy application files
+COPY . .
+
+# Generate Prisma Client
+RUN pnpm exec prisma generate
+
+# Expose backend port
+EXPOSE 9091
+
+# Start the dev watcher
+CMD ["pnpm", "run", "dev"]

@@ -1,0 +1,21 @@
+FROM node:20-alpine
+
+# Install pnpm
+RUN npm install -g pnpm
+
+WORKDIR /app
+
+# Copy lockfile and package configuration
+COPY package.json pnpm-lock.yaml ./
+
+# Install dependencies (cached in Docker layers)
+RUN pnpm install
+
+# Copy rest of the files
+COPY . .
+
+# Expose client port
+EXPOSE 9090
+
+# Run in dev mode
+CMD ["pnpm", "run", "dev"]

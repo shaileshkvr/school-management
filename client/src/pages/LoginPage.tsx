@@ -50,7 +50,8 @@ export const LoginPage: React.FC = () => {
             <input
               type="password"
               className="form-control"
-              placeholder="••••••••"
+              // placeholder="••••••••"
+              placeholder="* * * * *"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required

@@ -84,10 +84,18 @@ Seeding populates mock data, including realistic class age limits, Indian name d
 ```bash
 pnpm exec prisma db seed
 ```
-**Default Credentials:**
-- **Admin**: `secureadmin@school.com` / `admin-security-key-2816`
-- **Teacher**: `teacher@school.com` / `teacher123`
-- **Student**: `student@school.com` / `student123`
+### 4. Default Credentials:
+**Admin**: 
+   - `secureadmin@school.com`
+   - `admin-security-key-2816`
+
+**Teacher**:
+   - `teacher@school.com`
+   - `teacher123`
+
+**Student**: 
+   - `student@school.com`
+   - `student123`
 
 ### 4. Run Development Servers
 Start the backend Express server:

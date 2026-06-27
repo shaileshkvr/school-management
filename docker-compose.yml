@@ -1,36 +1,53 @@
 services:
 
-  # Frontend service
+  # Frontend service (React / Vite)
   client: 
-    build: ./client
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
     ports:
       - "9090:9090" # Exposes frontend to host at http://localhost:9090
+    volumes:
+      # Mount host files for development live reload
+      - ./client:/app
+      # Anonymous volume to keep container's pre-installed node_modules intact
+      - /app/node_modules
+    environment:
+      - WATCHPACK_POLLING=true
 
-  # Backend service
+  # Backend service (Node / Express)
   server:
-    build: ./server
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
     ports:
       - "9091:9091" # Exposes backend to host at http://localhost:9091
     depends_on:
       - school-postgres
     environment:
-      # CRITICAL: Backend container connects to Postgres using container port (5432) 
-      # and the service name (school-postgres) as the hostname.
-      # If running backend outside of docker (locally on host), use localhost:9099.
+      # Container connects using internal DNS (school-postgres) on internal port (5432)
       - DATABASE_URL=postgresql://admin:myschoolpostgres@school-postgres:5432/school_management?schema=public
+      # Forces tsx watch (chokidar) to use polling, enabling hot-reload inside container mounts
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      # Mount host files for development live reload
+      - ./server:/app
+      # Anonymous volume to keep container's pre-installed node_modules intact
+      - /app/node_modules
 
   # Database service
   school-postgres:
-    image: postgres:18.4-alpine # Using standard, highly supported Postgres alpine image
+    image: postgres:18.4-alpine
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: myschoolpostgres
-      POSTGRES_DB: school_management # Explicitly names the default database
+      POSTGRES_DB: school_management
     ports:
-      - "9099:5432" # Maps container port 5432 to host port 9099 (for pgAdmin/DBeaver on host)
+      - "9099:5432" # Maps container port 5432 to host port 9099
     volumes:
-      - postgres_data:/var/lib/postgresql # Mounts named volume to persist DB state for PG18+
+      # NOTE: Postgres 18+ alpine images fail to start if volume data is mounted to /var/lib/postgresql/data
+      # due to permission checks during directory init. It must map to /var/lib/postgresql directly.
+      - postgres_data:/var/lib/postgresql
 
-# Named volumes are managed by Docker and persist even if containers are deleted/rebuilt
 volumes:
   postgres_data:
