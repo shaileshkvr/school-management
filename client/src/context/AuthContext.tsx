@@ -1,68 +1,62 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import api from "../utils/api.js";
+import axios from "axios";
 
-export type Role = "ADMIN" | "TEACHER" | "STUDENT";
+const API_URL = "http://localhost:9091/api";
 
-interface User {
+// Set defaults for Cookie support
+axios.defaults.withCredentials = true;
+
+export interface UserProfile {
   id: string;
   email: string;
-  role: Role;
+  role: 'ADMIN' | 'TEACHER' | 'STUDENT';
 }
 
 interface AuthContextType {
-  user: User | null;
+  user: UserProfile | null;
+  loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  isLoading: boolean;
-  error: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Restore session on application mount
+  // Fetch user profile on mount
   useEffect(() => {
-    async function restoreSession() {
+    const verifySession = async () => {
       try {
-        const response = await api.get("/auth/me");
-        setUser(response.data.user);
-      } catch (err) {
-        setUser(null); // Cookie is missing, invalid, or expired
+        const res = await axios.get(`${API_URL}/auth/me`);
+        setUser(res.data.user);
+      } catch (e) {
+        setUser(null);
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
-    }
-    restoreSession();
+    };
+    verifySession();
   }, []);
 
   const login = async (email: string, password: string) => {
-    setError(null);
-    try {
-      const response = await api.post("/auth/login", { email, password });
-      setUser(response.data.user);
-    } catch (err: any) {
-      const msg = err.response?.data?.error || "Connection failed. Check server.";
-      setError(msg);
-      throw new Error(msg);
-    }
+    const res = await axios.post(`${API_URL}/auth/login`, { email, password });
+    setUser(res.data.user);
   };
 
   const logout = async () => {
     try {
-      await api.post("/auth/logout");
-    } catch (err) {
-      console.warn("Logout request failed on server, clearing client session anyway.");
+      await axios.post(`${API_URL}/auth/logout`);
+    } catch (e) {
+      // Fallback to local reset
     } finally {
       setUser(null);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading, error }}>
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
@@ -70,8 +64,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be executed within an AuthProvider");
-  }
+  if (!context) throw new Error("useAuth must be used within an AuthProvider");
   return context;
 };
