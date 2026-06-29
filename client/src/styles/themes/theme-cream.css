@@ -1,0 +1,15 @@
+body[data-theme="cream"] {
+  --canvas-bg: #faf6f0;
+  --glass-bg: rgba(245, 236, 225, 0.85);     /* Cozy coffee glass */
+  --glass-border: rgba(78, 54, 41, 0.15);
+  --glass-shadow: 0 10px 30px -5px rgba(78, 54, 41, 0.08);
+  --text-glass: #1c1510;
+  --text-glass-muted: #70533c;
+  --text-canvas: #1c1510;
+  --text-canvas-muted: #70533c;
+  --accent: #8c5e3c;                         /* Coffee brown accent */
+  --accent-hover: #a16e4c;
+  --border-radius: 12px;
+  --font-primary: 'Outfit', system-ui, sans-serif;
+  --body-bg-image: url('/mac-abs-light.png');
+}

@@ -1,0 +1,89 @@
+@import "./themes/theme-charcoal.css";
+@import "./themes/theme-cream.css";
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--canvas-bg);
+  background-image: var(--body-bg-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  color: var(--text-canvas);
+  font-family: var(--font-primary);
+  transition: background-color 0.3s ease, background-image 0.3s ease;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Glassmorphism panel utility */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--border-radius);
+  box-shadow: var(--glass-shadow);
+  color: var(--text-glass);
+  transition: border-color 0.25s cubic-bezier(0.23, 1, 0.32, 1),
+              background-color 0.25s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Button and Input controls */
+.glass-input {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  color: inherit;
+  outline: none;
+  transition: border-color 0.25s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.glass-input:focus {
+  border-color: var(--accent);
+}
+
+/* Hover effect on links in the sidebar */
+.sidebar-link-hover {
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.sidebar-link-hover:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+body[data-theme="cream"] .sidebar-link-hover:hover {
+  background-color: rgba(140, 94, 60, 0.08);
+}
+
+/* ===== Theme-Aware Custom Scrollbars ===== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--glass-border);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+/* Firefox scrollbar support */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--glass-border) transparent;
+}

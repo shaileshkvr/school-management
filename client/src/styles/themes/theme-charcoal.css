@@ -1,0 +1,15 @@
+body[data-theme="charcoal"] {
+  --canvas-bg: #0a0a0c;
+  --glass-bg: rgba(19, 19, 23, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
+  --text-glass: #f4f4f5;
+  --text-glass-muted: #a1a1aa;
+  --text-canvas: #f4f4f5;
+  --text-canvas-muted: #a1a1aa;
+  --accent: #3b82f6;                         /* Vibrant blue */
+  --accent-hover: #60a5fa;
+  --border-radius: 12px;
+  --font-primary: 'Outfit', system-ui, sans-serif;
+  --body-bg-image: url('/mac-abs-dark.png');
+}
