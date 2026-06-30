@@ -56,27 +56,12 @@ body {
 }
 
 .sidebar-link-hover:hover {
-  background-color: rgba(255, 255, 255, 0.08) !important;
-}
-
-body[data-theme="cream"] .sidebar-link-hover,
-body[data-theme="cream"] .sidebar-link-hover:visited {
-  color: var(--text-glass, #333333) !important;
-}
-
-body[data-theme="cream"] .sidebar-link-hover:hover {
-  background-color: rgba(140, 94, 60, 0.08) !important;
+  background-color: var(--sidebar-hover-bg) !important;
 }
 
 /* Active tab style highlights */
 .sidebar-link-active, .sidebar-link-active:visited {
-  background-color: var(--glass-border) !important;
-  color: var(--accent) !important;
-}
-
-body[data-theme="cream"] .sidebar-link-active,
-body[data-theme="cream"] .sidebar-link-active:visited {
-  background-color: rgba(140, 94, 60, 0.15) !important;
+  background-color: var(--sidebar-active-bg) !important;
   color: var(--accent) !important;
 }
 
