@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
-import { Calendar, Mail, Tag, X } from "lucide-react";
+import { Calendar, Mail, Tag, X, Trash2 } from "lucide-react";
+import { useConfirm } from "../../context/ConfirmContext";
 
 const API_URL = "http://localhost:9091/api";
 
@@ -40,6 +41,7 @@ export const NoticesPage: React.FC = () => {
   const { id: routeNoticeId } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const confirm = useConfirm();
 
   // DB States
   const [notices, setNotices] = useState<Notice[]>([]);
@@ -95,6 +97,46 @@ export const NoticesPage: React.FC = () => {
    */
   const handleNoticeSelect = (notice: Notice) => {
     navigate(`/admin/notices/${notice.id}`);
+  };
+
+  /**
+   * Sends DELETE request to remove a notice and updates local state
+   */
+  const handleDeleteNotice = async (noticeId: string) => {
+    const isConfirmed = await confirm({
+      title: "Delete Announcement",
+      message: "Are you sure you want to delete this notice announcement? This action cannot be undone.",
+      confirmText: "Delete",
+      cancelText: "Cancel",
+      type: "warning",
+    });
+
+    if (!isConfirmed) return;
+
+    try {
+      await axios.delete(`${API_URL}/admin/notices/${noticeId}`);
+
+      // Close reading panel if the deleted notice is active
+      if (routeNoticeId === noticeId) {
+        navigate("/admin/notices");
+      }
+
+      // Remove notice from local state
+      setNotices((prev) => prev.filter((n) => n.id !== noticeId));
+    } catch (err: unknown) {
+      console.error("Failed to delete notice:", err);
+      const errorMessage =
+        axios.isAxiosError(err) && err.response?.data?.error
+          ? String(err.response.data.error)
+          : "Failed to delete notice. Please try again.";
+      
+      await confirm({
+        title: "Delete Failed",
+        message: errorMessage,
+        confirmText: "Close",
+        type: "error"
+      });
+    }
   };
 
   /**
@@ -260,25 +302,56 @@ export const NoticesPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <button
-                onMouseEnter={() => setIsCloseHovered(true)}
-                onMouseLeave={() => setIsCloseHovered(false)}
-                onClick={handleCloseReadingPanel}
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: isCloseHovered ? "#ef4444" : "var(--text-glass)",
-                  cursor: "pointer",
-                  padding: "4px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  transition: "color 0.2s ease, transform 0.15s ease",
-                  transform: isCloseHovered ? "scale(1.15) rotate(90deg)" : "scale(1) rotate(0deg)"
-                }}
-              >
-                <X size={20} />
-              </button>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                {/* Delete announcement button */}
+                <button
+                  onClick={() => handleDeleteNotice(selectedNotice.id)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "var(--text-glass-muted)",
+                    cursor: "pointer",
+                    padding: "4px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    transition: "color 0.2s ease, transform 0.15s ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = "#ef4444";
+                    e.currentTarget.style.transform = "scale(1.15)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = "var(--text-glass-muted)";
+                    e.currentTarget.style.transform = "scale(1)";
+                  }}
+                  title="Delete Announcement"
+                >
+                  <Trash2 size={20} />
+                </button>
+
+                {/* Close reading panel button */}
+                <button
+                  onMouseEnter={() => setIsCloseHovered(true)}
+                  onMouseLeave={() => setIsCloseHovered(false)}
+                  onClick={handleCloseReadingPanel}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: isCloseHovered ? "#ef4444" : "var(--text-glass)",
+                    cursor: "pointer",
+                    padding: "4px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    transition: "color 0.2s ease, transform 0.15s ease",
+                    transform: isCloseHovered ? "scale(1.15) rotate(90deg)" : "scale(1) rotate(0deg)"
+                  }}
+                  title="Close Reading Panel"
+                >
+                  <X size={20} />
+                </button>
+              </div>
             </div>
 
             {/* Scope Badge */}

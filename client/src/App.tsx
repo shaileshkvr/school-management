@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
+import { ConfirmProvider } from "./context/ConfirmContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { DashboardLayout } from "./components/Layout/DashboardLayout";
 import { Login } from "./pages/Login";
@@ -22,7 +23,8 @@ function App() {
 
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <ConfirmProvider>
+        <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
           
@@ -117,6 +119,7 @@ function App() {
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </BrowserRouter>
+      </ConfirmProvider>
     </AuthProvider>
   );
 }

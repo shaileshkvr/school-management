@@ -10,6 +10,7 @@ import {
   updateFeeStatus,
   getNotices,
   createNotice,
+  deleteNotice,
   getSubjects,
 } from "../controllers/admin.js";
 
@@ -26,6 +27,7 @@ router.get("/fees", getFees);
 router.patch("/fees/:id", updateFeeStatus);
 router.get("/notices", getNotices);
 router.post("/notices", createNotice);
+router.delete("/notices/:id", deleteNotice);
 router.get("/subjects", getSubjects);
 
 export default router;

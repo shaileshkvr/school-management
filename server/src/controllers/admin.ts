@@ -213,3 +213,29 @@ export async function getSubjects(req: AuthenticatedRequest, res: Response) {
     return res.status(500).json({ error: "Failed to fetch subjects." });
   }
 }
+
+export async function deleteNotice(req: AuthenticatedRequest, res: Response) {
+  try {
+    const { id } = req.params;
+    if (!id || typeof id !== "string") {
+      return res.status(400).json({ error: "Invalid notice ID." });
+    }
+
+    const notice = await prisma.notification.findUnique({
+      where: { id },
+    });
+
+    if (!notice) {
+      return res.status(404).json({ error: "Notice not found." });
+    }
+
+    await prisma.notification.delete({
+      where: { id },
+    });
+
+    return res.status(200).json({ message: "Notice deleted successfully." });
+  } catch (error) {
+    console.error("Failed to delete notice:", error);
+    return res.status(500).json({ error: "Failed to delete notice." });
+  }
+}

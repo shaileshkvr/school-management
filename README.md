@@ -77,6 +77,7 @@ The application features a premium, responsive glassmorphic aesthetic linked to 
 *   **Notice list:** Displays bulletins, scope targets, and formatted publish timestamps.
 *   **Responsive Shrinking Split Layout:** Clicking a notice collapses the notice cards list container to `45%` width, letting the reading panel expand to `55%` width for comfortable full-screen reading. Notice selection synchronizes with router paths (`/admin/notices/:id`).
 *   **Form Publisher (`/admin/notices/new`):** Forms to input notice title/headline, message body, target checks (Global Broadcast vs. Class Target checkboxes grouped by Primary, Secondary, and Senior Sec accordion grids), and a disabled image file trigger.
+*   **Notice Deletion:** A red hover-scaling trash can icon button is integrated next to the close button inside the notice details header, allowing administrators to delete notices dynamically (executes `DELETE /api/admin/notices/:id` with confirmation prompts and updates state in real-time).
 
 ---
 
