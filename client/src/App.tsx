@@ -8,6 +8,7 @@ import { AdminDashboard } from "./pages/admin/AdminDashboard";
 import { TeacherDashboard } from "./pages/teacher/TeacherDashboard";
 import { StudentDashboard } from "./pages/student/StudentDashboard";
 import { StudentsPage } from "./pages/admin/StudentsPage";
+import { TeachersPage } from "./pages/admin/TeachersPage";
 
 function App() {
   // Set default theme attribute on mount
@@ -40,6 +41,17 @@ function App() {
               <ProtectedRoute allowedRoles={["ADMIN"]}>
                 <DashboardLayout>
                   <StudentsPage />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/teachers"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <DashboardLayout>
+                  <TeachersPage />
                 </DashboardLayout>
               </ProtectedRoute>
             }

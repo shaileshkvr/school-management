@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { Users, Star, X, ChevronDown, BookOpen } from "lucide-react";
 
@@ -131,11 +132,12 @@ export const StudentsPage: React.FC = () => {
   const [isCloseHovered, setIsCloseHovered] = useState(false);
   const [showClassDropdown, setShowClassDropdown] = useState(false);
 
-  // Filters State
-  const [searchText, setSearchText] = useState("");
-  const [feeFilter, setFeeFilter] = useState<string>("ALL");
-  const [ratingFilter, setRatingFilter] = useState<string>("ALL");
-  const [attendanceFilter, setAttendanceFilter] = useState<string>("ALL");
+  // Filters State derived from URL Search Parameters
+  const [searchParams] = useSearchParams();
+  const searchText = searchParams.get("q") || "";
+  const feeFilter = searchParams.get("fees") || "ALL";
+  const ratingFilter = searchParams.get("rating") || "ALL";
+  const attendanceFilter = searchParams.get("attendance") || "ALL";
 
   const classSelectorRef = useRef<HTMLDivElement>(null);
 
@@ -463,92 +465,6 @@ export const StudentsPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Filter Toolbar */}
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginBottom: "1.25rem" }}>
-              {/* Text Search */}
-              <input
-                type="text"
-                placeholder="Search student name..."
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                className="glass-panel glass-input"
-                style={{
-                  fontSize: "13px",
-                  padding: "8px 12px",
-                  flex: 1,
-                  minWidth: "160px",
-                  background: "var(--glass-bg)",
-                  color: "var(--text-glass)",
-                  border: "1px solid var(--glass-border)",
-                  height: "38px"
-                }}
-              />
-
-              {/* Fee Filter */}
-              <select
-                value={feeFilter}
-                onChange={(e) => setFeeFilter(e.target.value)}
-                className="glass-panel"
-                style={{
-                  fontSize: "13px",
-                  padding: "0 10px",
-                  height: "38px",
-                  background: "var(--glass-bg)",
-                  color: "var(--text-glass)",
-                  border: "1px solid var(--glass-border)",
-                  borderRadius: "8px",
-                  cursor: "pointer"
-                }}
-              >
-                <option value="ALL">All Fees</option>
-                <option value="PAID">Paid</option>
-                <option value="PARTIAL">Partial</option>
-                <option value="UNPAID">Unpaid</option>
-              </select>
-
-              {/* Rating Filter */}
-              <select
-                value={ratingFilter}
-                onChange={(e) => setRatingFilter(e.target.value)}
-                className="glass-panel"
-                style={{
-                  fontSize: "13px",
-                  padding: "0 10px",
-                  height: "38px",
-                  background: "var(--glass-bg)",
-                  color: "var(--text-glass)",
-                  border: "1px solid var(--glass-border)",
-                  borderRadius: "8px",
-                  cursor: "pointer"
-                }}
-              >
-                <option value="ALL">All Ratings</option>
-                <option value="HIGH">{"Highly Rated (>= 4.5)"}</option>
-                <option value="MID">{"Average (4.0 - 4.5)"}</option>
-                <option value="LOW">{"Alert / Low (< 4.0)"}</option>
-              </select>
-
-              {/* Attendance Filter */}
-              <select
-                value={attendanceFilter}
-                onChange={(e) => setAttendanceFilter(e.target.value)}
-                className="glass-panel"
-                style={{
-                  fontSize: "13px",
-                  padding: "0 10px",
-                  height: "38px",
-                  background: "var(--glass-bg)",
-                  color: "var(--text-glass)",
-                  border: "1px solid var(--glass-border)",
-                  borderRadius: "8px",
-                  cursor: "pointer"
-                }}
-              >
-                <option value="ALL">All Attendance</option>
-                <option value="OK">{"Regular (>= 75%)"}</option>
-                <option value="LOW">{"Low Attendance Alert (< 75%)"}</option>
-              </select>
-            </div>
 
             {/* Students List Table */}
             {filteredStudents.length > 0 ? (
