@@ -62,7 +62,12 @@ The application features a premium, responsive glassmorphic aesthetic linked to 
 
 ## 📂 Core Administration Views
 
-### 1. Database-Driven Roster (Students)
+### 1. Dynamic Analytics Dashboard
+*   **Database Integration:** Fetches real metrics from the Express server endpoint `GET /api/admin/stats` dynamically on mount, replacing hardcoded mock metrics.
+*   **Analytics Grid:** Displays glassmorphic widgets for Total Students, Faculties (Instructors count), Total Classes, and Outstanding Fees (formatted dynamically into Indian Rupees `INR` currency).
+*   **Announcements Feed:** Renders a scrollable feed of the 5 most recent bulletin updates. Clicking an update redirects the administrator directly to the Notices page details split layout view.
+
+### 2. Database-Driven Roster (Students)
 *   **Categorized Class Selector:** Large card grids are collapsed into a single column Primary (Grade 1-5), Secondary (Grade 6-10), and Senior Secondary (Grade 11-12 split by Science, Commerce, and Arts) glass dropdown.
 *   **Combined Registers:** Sections (e.g., Grade 8-A and 8-B) are grouped dynamically. Lists load in alphabetical order displaying both class teachers.
 *   **Metadata Badges:** Displays average rating (Lucide star scales), attendance alerts (low attendance highlighted in red), and fee status flags (`PAID`, `PARTIAL`, `UNPAID`).
