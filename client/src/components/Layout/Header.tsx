@@ -1,17 +1,32 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useSearchParams, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { Search, SlidersHorizontal, LogOut, Settings, User, Check } from "lucide-react";
+import axios from "axios";
+import { Search, SlidersHorizontal, LogOut, Settings, User, ChevronDown } from "lucide-react";
+
+const API_URL = "http://localhost:9091/api";
+
 
 export const Header: React.FC = () => {
   const { user, logout } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
-  const [selectedFilters, setSelectedFilters] = useState({
-    class: false,
-    subject: false,
-    status: false,
-  });
+  // Router Location & Search Params Integration
+  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
+
+  const isStudentsPage = location.pathname === "/admin/students";
+  const isTeachersPage = location.pathname === "/admin/teachers";
+  const showFilterButton = isStudentsPage || isTeachersPage;
+
+  // Active query parameter bindings
+  const q = searchParams.get("q") || "";
+
+  // Dynamic filter collections
+  const [classesList, setClassesList] = useState<string[]>([]);
+  const [subjectsList, setSubjectsList] = useState<string[]>([]);
+  const [showTaughtCollapse, setShowTaughtCollapse] = useState(false);
 
   const filterRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -30,8 +45,100 @@ export const Header: React.FC = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const toggleFilter = (key: 'class' | 'subject' | 'status') => {
-    setSelectedFilters(prev => ({ ...prev, [key]: !prev[key] }));
+  // Fetch unique filter values dynamically if page supports filters
+  useEffect(() => {
+    if (!showFilterButton) return;
+    const fetchFilterDependencies = async () => {
+      try {
+        const [resClasses, resTeachers] = await Promise.all([
+          axios.get(`${API_URL}/admin/classes`),
+          axios.get(`${API_URL}/admin/teachers`),
+        ]);
+        
+        // Extract classes names
+        const classNames = resClasses.data.map((c: any) => c.name);
+        setClassesList(classNames.sort());
+
+        // Group-to-Subject map based on academic seeding
+        const groupSubjects: Record<string, string[]> = {
+          PRIMARY: ["English", "Mathematics", "Science", "Hindi", "Computer Science", "Geography"],
+          SECONDARY: ["Physics", "Chemistry", "Biology", "Mathematics", "Social-Science", "English Literature"],
+          SENIOR_SECONDARY: ["Accountancy", "Business Studies", "Physics", "Chemistry", "Economics", "History", "Sociology"],
+          SPECIAL: ["Computer Science", "Fine Arts", "Music", "Physical Education"],
+        };
+
+        // Extract subjects dynamically
+        const subjectsSet = new Set<string>();
+        resTeachers.data.forEach((t: any) => {
+          const subjects = groupSubjects[t.group] || ["General Studies"];
+          const subjectIndex = parseInt(t.id.slice(0, 4), 16) % subjects.length;
+          subjectsSet.add(subjects[subjectIndex]);
+        });
+        setSubjectsList(Array.from(subjectsSet).sort());
+      } catch (err) {
+        console.error("Failed to load filter metadata:", err);
+      }
+    };
+    fetchFilterDependencies();
+  }, [showFilterButton]);
+
+  /**
+   * Helper function to modify query parameters in the URL query string
+   */
+  const updateQueryParam = (key: string, value: string) => {
+    setSearchParams((prev) => {
+      if (value === "ALL" || value === "") {
+        prev.delete(key);
+      } else {
+        prev.set(key, value);
+      }
+      return prev;
+    });
+  };
+
+  /**
+   * Toggles class checkboxes in the url parameter string (e.g. classes=Grade+8-A,Grade+8-B)
+   */
+  const handleClassesFilterChange = (className: string) => {
+    setSearchParams((prev) => {
+      const currentVal = prev.get("classes") || "";
+      const currentList = currentVal ? currentVal.split(",") : [];
+      let newList: string[];
+      if (currentList.includes(className)) {
+        newList = currentList.filter(c => c !== className);
+      } else {
+        newList = [...currentList, className];
+      }
+      if (newList.length === 0) {
+        prev.delete("classes");
+      } else {
+        prev.set("classes", newList.join(","));
+      }
+      return prev;
+    });
+  };
+
+  /**
+   * Returns a parsed string array of active classes filtered
+   */
+  const getSelectedClassesFilterList = (): string[] => {
+    const val = searchParams.get("classes") || "";
+    return val ? val.split(",") : [];
+  };
+
+  /**
+   * Resets all filter values but preserves search query 'q'
+   */
+  const clearAllFilters = () => {
+    setSearchParams((prev) => {
+      const qVal = prev.get("q");
+      Array.from(prev.keys()).forEach(key => prev.delete(key));
+      if (qVal) {
+        prev.set("q", qVal);
+      }
+      return prev;
+    });
+    setShowFilters(false);
   };
 
   const getRoleBadgeStyle = (role?: string) => {
@@ -63,7 +170,9 @@ export const Header: React.FC = () => {
           <Search style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", color: "var(--text-glass-muted)" }} size={18} />
           <input
             type="text"
-            placeholder="Search students, classes, records..."
+            placeholder={isStudentsPage ? "Search students by name..." : isTeachersPage ? "Search teachers by name or Emp ID..." : "Search dashboard logs..."}
+            value={q}
+            onChange={(e) => updateQueryParam("q", e.target.value)}
             className="glass-panel glass-input"
             style={{
               width: "100%",
@@ -78,156 +187,300 @@ export const Header: React.FC = () => {
           />
         </div>
         
-        <div ref={filterRef} style={{ position: "relative" }}>
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="glass-panel"
-            style={{
-              padding: "0 16px",
-              height: "42px",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              background: "var(--glass-bg)",
-              color: "var(--text-glass)",
-              border: "1px solid var(--glass-border)",
-              borderRadius: "10px",
-              cursor: "pointer",
-              transition: "var(--transition-smooth)",
-            }}
-          >
-            <SlidersHorizontal size={15} />
-            <span style={{ fontSize: "13px", fontWeight: 600 }}>Filter</span>
-          </button>
-
-          {/* Premium Glass Popover Filter List */}
-          {showFilters && (
-            <div
+        {/* Dynamic Filters Trigger */}
+        {showFilterButton && (
+          <div ref={filterRef} style={{ position: "relative" }}>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
               className="glass-panel"
               style={{
-                position: "absolute",
-                top: "50px",
-                right: 0,
-                width: "280px",
-                padding: "16px",
-                zIndex: 200,
+                padding: "0 16px",
+                height: "42px",
                 display: "flex",
-                flexDirection: "column",
-                gap: "10px",
+                alignItems: "center",
+                gap: "8px",
                 background: "var(--glass-bg)",
-                backdropFilter: "blur(16px)",
-                WebkitBackdropFilter: "blur(16px)",
-                border: "1px solid var(--glass-border)",
-                boxShadow: "var(--glass-shadow)",
                 color: "var(--text-glass)",
-                borderRadius: "16px",
+                border: "1px solid var(--glass-border)",
+                borderRadius: "10px",
+                cursor: "pointer",
+                transition: "var(--transition-smooth)",
               }}
             >
-              <div style={{ fontWeight: "700", fontSize: "11px", textTransform: "uppercase", color: "var(--accent)", letterSpacing: "0.05em", marginBottom: "4px" }}>
-                Filter Resources
-              </div>
+              <SlidersHorizontal size={15} />
+              <span style={{ fontSize: "13px", fontWeight: 600 }}>Filter</span>
+            </button>
 
-              {/* Custom Checkbox Row - Class */}
+            {/* Premium Glass Popover Filter List */}
+            {showFilters && (
               <div
-                onClick={() => toggleFilter('class')}
+                className="glass-panel"
                 style={{
+                  position: "absolute",
+                  top: "50px",
+                  right: 0,
+                  width: "280px",
+                  padding: "16px",
+                  zIndex: 200,
                   display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  padding: "10px 12px",
-                  borderRadius: "8px",
-                  background: selectedFilters.class ? "rgba(234, 88, 12, 0.15)" : "rgba(255, 255, 255, 0.05)",
-                  border: "1px solid",
-                  borderColor: selectedFilters.class ? "var(--accent)" : "var(--glass-border)",
-                  cursor: "pointer",
-                  transition: "all 0.2s var(--transition-smooth)",
+                  flexDirection: "column",
+                  gap: "12px",
+                  background: "var(--glass-bg)",
+                  backdropFilter: "blur(16px)",
+                  WebkitBackdropFilter: "blur(16px)",
+                  border: "1px solid var(--glass-border)",
+                  boxShadow: "var(--glass-shadow)",
+                  color: "var(--text-glass)",
+                  borderRadius: "16px",
                 }}
               >
-                <span style={{ fontSize: "13px", fontWeight: 500 }}>Filter by Class</span>
-                <div style={{
-                  width: "18px",
-                  height: "18px",
-                  borderRadius: "6px",
-                  border: "2px solid",
-                  borderColor: selectedFilters.class ? "var(--accent)" : "var(--text-glass-muted)",
-                  background: selectedFilters.class ? "var(--accent)" : "transparent",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  transition: "all 0.15s ease",
-                }}>
-                  {selectedFilters.class && <Check size={12} color="#fff" strokeWidth={3} />}
+                <div style={{ fontWeight: "700", fontSize: "11px", textTransform: "uppercase", color: "var(--accent)", letterSpacing: "0.05em", borderBottom: "1px solid var(--glass-border)", paddingBottom: "4px" }}>
+                  {isStudentsPage ? "Student Filters" : "Faculty Filters"}
                 </div>
-              </div>
 
-              {/* Custom Checkbox Row - Subject */}
-              <div
-                onClick={() => toggleFilter('subject')}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  padding: "10px 12px",
-                  borderRadius: "8px",
-                  background: selectedFilters.subject ? "rgba(234, 88, 12, 0.15)" : "rgba(255, 255, 255, 0.05)",
-                  border: "1px solid",
-                  borderColor: selectedFilters.subject ? "var(--accent)" : "var(--glass-border)",
-                  cursor: "pointer",
-                  transition: "all 0.2s var(--transition-smooth)",
-                }}
-              >
-                <span style={{ fontSize: "13px", fontWeight: 500 }}>Filter by Subject</span>
-                <div style={{
-                  width: "18px",
-                  height: "18px",
-                  borderRadius: "6px",
-                  border: "2px solid",
-                  borderColor: selectedFilters.subject ? "var(--accent)" : "var(--text-glass-muted)",
-                  background: selectedFilters.subject ? "var(--accent)" : "transparent",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  transition: "all 0.15s ease",
-                }}>
-                  {selectedFilters.subject && <Check size={12} color="#fff" strokeWidth={3} />}
-                </div>
-              </div>
+                {/* Render Students Page Filter Menus */}
+                {isStudentsPage && (
+                  <>
+                    {/* Fee status */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                      <label style={{ fontSize: "10px", color: "var(--text-glass-muted)", fontWeight: "700", textTransform: "uppercase" }}>Fees Status</label>
+                      <select
+                        value={searchParams.get("fees") || "ALL"}
+                        onChange={(e) => updateQueryParam("fees", e.target.value)}
+                        className="glass-panel"
+                        style={{
+                          fontSize: "12px",
+                          padding: "0 10px",
+                          height: "36px",
+                          background: "rgba(255, 255, 255, 0.05)",
+                          color: "var(--text-glass)",
+                          border: "1px solid var(--glass-border)",
+                          borderRadius: "8px",
+                          cursor: "pointer",
+                          width: "100%"
+                        }}
+                      >
+                        <option value="ALL">All Fees</option>
+                        <option value="PAID">Paid</option>
+                        <option value="PARTIAL">Partial</option>
+                        <option value="UNPAID">Unpaid</option>
+                      </select>
+                    </div>
 
-              {/* Custom Checkbox Row - Status */}
-              <div
-                onClick={() => toggleFilter('status')}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  padding: "10px 12px",
-                  borderRadius: "8px",
-                  background: selectedFilters.status ? "rgba(234, 88, 12, 0.15)" : "rgba(255, 255, 255, 0.05)",
-                  border: "1px solid",
-                  borderColor: selectedFilters.status ? "var(--accent)" : "var(--glass-border)",
-                  cursor: "pointer",
-                  transition: "all 0.2s var(--transition-smooth)",
-                }}
-              >
-                <span style={{ fontSize: "13px", fontWeight: 500 }}>Filter by Status</span>
-                <div style={{
-                  width: "18px",
-                  height: "18px",
-                  borderRadius: "6px",
-                  border: "2px solid",
-                  borderColor: selectedFilters.status ? "var(--accent)" : "var(--text-glass-muted)",
-                  background: selectedFilters.status ? "var(--accent)" : "transparent",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  transition: "all 0.15s ease",
-                }}>
-                  {selectedFilters.status && <Check size={12} color="#fff" strokeWidth={3} />}
-                </div>
+                    {/* Average Rating */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                      <label style={{ fontSize: "10px", color: "var(--text-glass-muted)", fontWeight: "700", textTransform: "uppercase" }}>Average Rating</label>
+                      <select
+                        value={searchParams.get("rating") || "ALL"}
+                        onChange={(e) => updateQueryParam("rating", e.target.value)}
+                        className="glass-panel"
+                        style={{
+                          fontSize: "12px",
+                          padding: "0 10px",
+                          height: "36px",
+                          background: "rgba(255, 255, 255, 0.05)",
+                          color: "var(--text-glass)",
+                          border: "1px solid var(--glass-border)",
+                          borderRadius: "8px",
+                          cursor: "pointer",
+                          width: "100%"
+                        }}
+                      >
+                        <option value="ALL">All Ratings</option>
+                        <option value="HIGH">Highly Rated (&ge; 4.5)</option>
+                        <option value="MID">Average (4.0 - 4.5)</option>
+                        <option value="LOW">Alert / Low (&lt; 4.0)</option>
+                      </select>
+                    </div>
+
+                    {/* Attendance Alert */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                      <label style={{ fontSize: "10px", color: "var(--text-glass-muted)", fontWeight: "700", textTransform: "uppercase" }}>Attendance</label>
+                      <select
+                        value={searchParams.get("attendance") || "ALL"}
+                        onChange={(e) => updateQueryParam("attendance", e.target.value)}
+                        className="glass-panel"
+                        style={{
+                          fontSize: "12px",
+                          padding: "0 10px",
+                          height: "36px",
+                          background: "rgba(255, 255, 255, 0.05)",
+                          color: "var(--text-glass)",
+                          border: "1px solid var(--glass-border)",
+                          borderRadius: "8px",
+                          cursor: "pointer",
+                          width: "100%"
+                        }}
+                      >
+                        <option value="ALL">All Attendance</option>
+                        <option value="OK">Regular (&ge; 75%)</option>
+                        <option value="LOW">Low Attendance Alert (&lt; 75%)</option>
+                      </select>
+                    </div>
+                  </>
+                )}
+
+                {/* Render Teachers Page Filter Menus */}
+                {isTeachersPage && (
+                  <>
+                    {/* Seniority */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                      <label style={{ fontSize: "10px", color: "var(--text-glass-muted)", fontWeight: "700", textTransform: "uppercase" }}>Seniority</label>
+                      <select
+                        value={searchParams.get("seniority") || "ALL"}
+                        onChange={(e) => updateQueryParam("seniority", e.target.value)}
+                        className="glass-panel"
+                        style={{
+                          fontSize: "12px",
+                          padding: "0 10px",
+                          height: "36px",
+                          background: "rgba(255, 255, 255, 0.05)",
+                          color: "var(--text-glass)",
+                          border: "1px solid var(--glass-border)",
+                          borderRadius: "8px",
+                          cursor: "pointer",
+                          width: "100%"
+                        }}
+                      >
+                        <option value="ALL">All Seniority</option>
+                        <option value="JUNIOR">Junior (&lt; 2 yrs)</option>
+                        <option value="MID">Mid-Level (2-5 yrs)</option>
+                        <option value="SENIOR">Senior (&gt; 5 yrs)</option>
+                      </select>
+                    </div>
+
+                    {/* Specialty Subject */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                      <label style={{ fontSize: "10px", color: "var(--text-glass-muted)", fontWeight: "700", textTransform: "uppercase" }}>Specialty Subject</label>
+                      <select
+                        value={searchParams.get("subject") || "ALL"}
+                        onChange={(e) => updateQueryParam("subject", e.target.value)}
+                        className="glass-panel"
+                        style={{
+                          fontSize: "12px",
+                          padding: "0 10px",
+                          height: "36px",
+                          background: "rgba(255, 255, 255, 0.05)",
+                          color: "var(--text-glass)",
+                          border: "1px solid var(--glass-border)",
+                          borderRadius: "8px",
+                          cursor: "pointer",
+                          width: "100%"
+                        }}
+                      >
+                        <option value="ALL">All Subjects</option>
+                        {subjectsList.map((sub) => (
+                          <option key={sub} value={sub}>{sub}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Gender */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                      <label style={{ fontSize: "10px", color: "var(--text-glass-muted)", fontWeight: "700", textTransform: "uppercase" }}>Gender</label>
+                      <select
+                        value={searchParams.get("gender") || "ALL"}
+                        onChange={(e) => updateQueryParam("gender", e.target.value)}
+                        className="glass-panel"
+                        style={{
+                          fontSize: "12px",
+                          padding: "0 10px",
+                          height: "36px",
+                          background: "rgba(255, 255, 255, 0.05)",
+                          color: "var(--text-glass)",
+                          border: "1px solid var(--glass-border)",
+                          borderRadius: "8px",
+                          cursor: "pointer",
+                          width: "100%"
+                        }}
+                      >
+                        <option value="ALL">All Genders</option>
+                        <option value="MALE">Male</option>
+                        <option value="FEMALE">Female</option>
+                        <option value="OTHER">Other</option>
+                      </select>
+                    </div>
+
+                    {/* Collapsible Classes Taught checkboxes */}
+                    <div style={{ borderTop: "1px solid var(--glass-border)", paddingTop: "10px", marginTop: "4px" }}>
+                      <button
+                        onClick={() => setShowTaughtCollapse(!showTaughtCollapse)}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          color: "var(--accent)",
+                          width: "100%",
+                          textAlign: "left",
+                          fontWeight: "700",
+                          fontSize: "10px",
+                          textTransform: "uppercase",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <span>Classes Taught</span>
+                        <ChevronDown size={12} style={{ transform: showTaughtCollapse ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.2s" }} />
+                      </button>
+
+                      {showTaughtCollapse && (
+                        <div style={{
+                          maxHeight: "120px",
+                          overflowY: "auto",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "6px",
+                          marginTop: "6px",
+                          padding: "6px",
+                          background: "rgba(0, 0, 0, 0.12)",
+                          borderRadius: "6px"
+                        }}>
+                          {classesList.map((className) => {
+                            const classesFilterList = getSelectedClassesFilterList();
+                            const isChecked = classesFilterList.includes(className);
+                            return (
+                              <label key={className} style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "11px", cursor: "pointer" }}>
+                                <input
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  onChange={() => handleClassesFilterChange(className)}
+                                  style={{ accentColor: "var(--accent)", cursor: "pointer" }}
+                                />
+                                <span>{className}</span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                {/* Reset Filters Option Button */}
+                <button
+                  onClick={clearAllFilters}
+                  style={{
+                    padding: "8px",
+                    fontSize: "12px",
+                    fontWeight: "700",
+                    color: "#ff3b30",
+                    background: "rgba(255, 59, 48, 0.1)",
+                    border: "1px solid rgba(255, 59, 48, 0.2)",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                    marginTop: "6px",
+                    transition: "background-color 0.2s"
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "rgba(255, 59, 48, 0.18)"}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "rgba(255, 59, 48, 0.1)"}
+                >
+                  Reset All Filters
+                </button>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* User Profile dropdown */}
