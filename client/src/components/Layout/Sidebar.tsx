@@ -1,14 +1,19 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { LayoutDashboard, Users, GraduationCap, Receipt, Bell, BookOpen, ChevronLeft, ChevronRight } from "lucide-react";
 
 export const Sidebar: React.FC = () => {
   const { user } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isLogoHovered, setIsLogoHovered] = useState(false);
+  const location = useLocation();
 
   const activeRole = user?.role;
 
+  /**
+   * Retrieves role-specific navigation menu items
+   */
   const getMenuItems = () => {
     switch (activeRole) {
       case "ADMIN":
@@ -48,64 +53,130 @@ export const Sidebar: React.FC = () => {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        padding: "1.75rem 0.75rem",
+        padding: "1.5rem 0.75rem",
         gap: "1.75rem",
         transition: "width 0.3s cubic-bezier(0.23, 1, 0.32, 1)",
         position: "sticky",
         top: "16px",
       }}
     >
-      {/* Logo Brand Header */}
-      <div style={{ display: "flex", alignItems: "center", gap: "12px", width: "100%", padding: "0 12px" }}>
-        <span style={{ fontSize: "22px", fontWeight: 800, color: "var(--accent)" }}>✦</span>
-        {!isCollapsed && <span style={{ fontWeight: 800, fontSize: "16px", letterSpacing: "-0.01em" }}>EduPortal</span>}
-      </div>
+      {/* Brand Header with Collapsed Hover Morph Toggle */}
+      {isCollapsed ? (
+        /* Unified Collapsed Logo Trigger Box centered on axis */
+        <button
+          onClick={() => {
+            setIsCollapsed(false);
+            setIsLogoHovered(false); // Reset hover state
+          }}
+          onMouseEnter={() => setIsLogoHovered(true)}
+          onMouseLeave={() => setIsLogoHovered(false)}
+          style={{
+            width: "44px",
+            height: "44px",
+            borderRadius: "10px",
+            background: isLogoHovered ? "rgba(255,255,255,0.08)" : "transparent",
+            border: isLogoHovered ? "1px solid var(--glass-border)" : "1px solid transparent",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            transition: "all 0.2s ease",
+            color: "inherit",
+            padding: 0,
+            margin: "0 auto"
+          }}
+          title="Expand Sidebar"
+        >
+          {isLogoHovered ? (
+            <ChevronRight size={22} style={{ color: "var(--accent)" }} />
+          ) : (
+            <span style={{ fontSize: "24px", fontWeight: 800, color: "var(--accent)" }}>✦</span>
+          )}
+        </button>
+      ) : (
+        /* Regular Expanded Brand Header Layout */
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            width: "100%",
+            padding: "0 10px",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <span style={{ fontSize: "22px", fontWeight: 800, color: "var(--accent)" }}>✦</span>
+            <span style={{ fontWeight: 800, fontSize: "16px", letterSpacing: "-0.01em" }}>
+              EduPortal
+            </span>
+          </div>
 
-      {/* Navigation Links list */}
-      <nav style={{ width: "100%", flex: 1, display: "flex", flexDirection: "column", gap: "10px" }}>
-        {menuItems.map((item, idx) => (
-          <Link
-            key={idx}
-            to={item.path}
+          <button
+            onClick={() => setIsCollapsed(true)}
             style={{
+              background: "rgba(255,255,255,0.05)",
+              border: "1px solid var(--glass-border)",
+              color: "inherit",
+              borderRadius: "50%",
+              width: "28px",
+              height: "28px",
               display: "flex",
               alignItems: "center",
-              padding: "12px 16px",
-              borderRadius: "10px",
-              color: "inherit",
-              textDecoration: "none",
-              gap: "14px",
-              transition: "background-color 0.2s ease, transform 0.15s ease",
+              justifyContent: "center",
+              cursor: "pointer",
+              transition: "all 0.2s ease",
             }}
-            className="sidebar-link-hover"
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.12)")}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)")}
           >
-            {item.icon}
-            {!isCollapsed && <span style={{ fontSize: "15px", fontWeight: 600, letterSpacing: "-0.01em" }}>{item.label}</span>}
-          </Link>
-        ))}
-      </nav>
+            <ChevronLeft size={14} />
+          </button>
+        </div>
+      )}
 
-      {/* Collapse switch button */}
-      <button
-        onClick={() => setIsCollapsed(!isCollapsed)}
-        style={{
-          background: "rgba(255,255,255,0.05)",
-          border: "1px solid rgba(255,255,255,0.1)",
-          color: "inherit",
-          borderRadius: "50%",
-          width: "32px",
-          height: "32px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          cursor: "pointer",
-          transition: "background-color 0.2s",
-        }}
-        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.1)")}
-        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)")}
-      >
-        {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-      </button>
+      {/* Navigation Links List */}
+      <nav style={{ width: "100%", flex: 1, display: "flex", flexDirection: "column", gap: "6px" }}>
+        {menuItems.map((item, idx) => {
+          const isActive =
+            location.pathname === item.path ||
+            (item.path !== "/admin" && location.pathname.startsWith(item.path));
+
+          return (
+            <Link
+              key={idx}
+              to={item.path}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: isCollapsed ? "center" : "flex-start",
+                padding: isCollapsed ? "0" : "12px 16px",
+                width: isCollapsed ? "44px" : "100%",
+                height: isCollapsed ? "44px" : "auto",
+                borderRadius: "10px",
+                margin: isCollapsed ? "0 auto" : "0",
+                textDecoration: "none",
+                gap: isCollapsed ? "0" : "14px",
+                transition: "background-color 0.2s ease, transform 0.15s ease, color 0.2s ease",
+              }}
+              className={`sidebar-link-hover ${isActive ? "sidebar-link-active" : ""}`}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  transition: "color 0.2s ease",
+                }}
+              >
+                {item.icon}
+              </div>
+              {!isCollapsed && (
+                <span style={{ fontSize: "15px", fontWeight: 600, letterSpacing: "-0.01em" }}>
+                  {item.label}
+                </span>
+              )}
+            </Link>
+          );
+        })}
+      </nav>
     </aside>
   );
 };

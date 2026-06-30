@@ -50,16 +50,40 @@ body {
 }
 
 /* Hover effect on links in the sidebar */
-.sidebar-link-hover {
-  transition: background-color 0.2s ease, transform 0.2s ease;
+.sidebar-link-hover, .sidebar-link-hover:visited {
+  color: var(--text-glass) !important;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
 }
 
 .sidebar-link-hover:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+body[data-theme="cream"] .sidebar-link-hover,
+body[data-theme="cream"] .sidebar-link-hover:visited {
+  color: var(--text-glass, #333333) !important;
 }
 
 body[data-theme="cream"] .sidebar-link-hover:hover {
-  background-color: rgba(140, 94, 60, 0.08);
+  background-color: rgba(140, 94, 60, 0.08) !important;
+}
+
+/* Active tab style highlights */
+.sidebar-link-active, .sidebar-link-active:visited {
+  background-color: var(--glass-border) !important;
+  color: var(--accent) !important;
+}
+
+body[data-theme="cream"] .sidebar-link-active,
+body[data-theme="cream"] .sidebar-link-active:visited {
+  background-color: rgba(140, 94, 60, 0.15) !important;
+  color: var(--accent) !important;
+}
+
+/* Moment of click state: turns to theme accent hover color with a soft fade transition */
+.sidebar-link-hover:active {
+  color: var(--accent-hover) !important;
+  opacity: 0.75 !important;
 }
 
 /* ===== Theme-Aware Custom Scrollbars ===== */
