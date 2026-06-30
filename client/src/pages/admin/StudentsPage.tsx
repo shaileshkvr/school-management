@@ -323,9 +323,6 @@ export const StudentsPage: React.FC = () => {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem" }}>
         <div>
           <h2 style={{ color: "var(--text-canvas)", fontSize: "1.8rem", fontWeight: "700" }}>Students Administration</h2>
-          <p style={{ color: "var(--text-canvas-muted, #7c7c82)", fontSize: "0.95rem", marginTop: "2px" }}>
-            Manage registers, student performance rating records, and fee logs
-          </p>
         </div>
 
         {/* Unified Class Selector Dropdown */}

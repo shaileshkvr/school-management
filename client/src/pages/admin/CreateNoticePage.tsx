@@ -183,7 +183,6 @@ export const CreateNoticePage: React.FC = () => {
         </button>
         <div>
           <h2 style={{ color: "var(--text-canvas)", fontSize: "1.6rem", fontWeight: "700" }}>Publish New Notice</h2>
-          <p style={{ color: "var(--text-canvas-muted)", fontSize: "0.9rem" }}>Broadcast announcements to classes and notice boards</p>
         </div>
       </div>
 

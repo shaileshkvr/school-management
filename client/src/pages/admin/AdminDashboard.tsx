@@ -64,12 +64,8 @@ export const AdminDashboard: React.FC = () => {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", width: "100%" }}>
-      {/* Console Title */}
       <div>
         <h2 style={{ color: "var(--text-canvas)", fontSize: "1.8rem", fontWeight: "700" }}>Admin Console</h2>
-        <p style={{ color: "var(--text-canvas-muted, #7c7c82)", fontSize: "0.95rem", marginTop: "4px" }}>
-          School analytics dashboard, registration indices, and bulletin activity
-        </p>
       </div>
 
       {/* Grid statistics panel */}

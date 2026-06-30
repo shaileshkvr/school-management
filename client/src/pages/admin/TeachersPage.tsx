@@ -195,9 +195,6 @@ export const TeachersPage: React.FC = () => {
     <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem", width: "100%" }}>
       <div>
         <h2 style={{ color: "var(--text-canvas)", fontSize: "1.8rem", fontWeight: "700" }}>Teachers Administration</h2>
-        <p style={{ color: "var(--text-canvas-muted, #7c7c82)", fontSize: "0.95rem", marginTop: "4px" }}>
-          Manage faculty directories, course assignments, seniority tracks, and class leaders
-        </p>
       </div>
 
       <div style={{ display: "flex", gap: "1rem", position: "relative", alignItems: "flex-start" }}>
