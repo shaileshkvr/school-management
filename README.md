@@ -8,9 +8,9 @@ A modular, production-ready School Management System built using a decoupled Rea
 
 ### Frontend (`/client`)
 - **Core**: React 19, TypeScript, Vite
-- **Styling**: Vanilla CSS (modular design tokens and CSS variables)
-- **Routing**: React Router DOM (role-based protected routes)
-- **State**: Auth Session Context Provider
+- **Styling**: Vanilla CSS (modular design tokens and HSL customized CSS variables)
+- **Routing**: React Router DOM (role-based protected routes and client-side SPA routing)
+- **State**: Auth Session Context Provider + URL Query Search Parameters
 
 ### Backend (`/server`)
 - **Core**: Node.js, Express 5, TypeScript
@@ -25,16 +25,17 @@ A modular, production-ready School Management System built using a decoupled Rea
 .
 ├── client/                     # React Frontend App
 │   ├── src/
-│   │   ├── components/         # Reusable layouts & UI blocks
+│   │   ├── components/         # Reusable layouts & UI blocks (Sidebar, Header, ProtectedRoute)
 │   │   ├── context/            # AuthContext session provider
-│   │   └── pages/              # Login, Admin, Teacher, Student dashboards
+│   │   ├── styles/             # Global index.css resets, theme sheets (cream.css, charcoal.css)
+│   │   └── pages/              # Login, Admin, Teacher, Student dashboards & Admin Subpages
 │   └── Dockerfile              # Multi-stage production Nginx container
 ├── server/                     # Node/Express Backend App
 │   ├── src/
 │   │   ├── config/             # Database pool connection setup
-│   │   ├── controllers/        # Auth endpoints
+│   │   ├── controllers/        # Auth, class, student, teacher, fee and notice endpoints
 │   │   ├── middleware/         # Security & RBAC checks
-│   │   └── routes/             # Authentication routing
+│   │   └── routes/             # Authentication and admin panel routing
 │   ├── prisma/
 │   │   ├── schema.prisma       # Prisma DB models
 │   │   ├── seed.ts             # Modular seeder orchestrator
@@ -44,6 +45,38 @@ A modular, production-ready School Management System built using a decoupled Rea
 ├── docker-compose.yml          # Multi-container local build setup
 └── README.md                   # Project documentation
 ```
+
+---
+
+## 🎨 Design & Layout System
+
+The application features a premium, responsive glassmorphic aesthetic linked to customizable dark and light style profiles:
+*   **Floating Sidebar Layout:** A detached glassy navigation container floating next to the main viewport. Includes a collapsible toggle supporting a 72px slim vertical menu (icons-only) and a 260px expanded menu.
+*   **Dual Themes Vibe:** Responsive CSS custom variables linked to a `data-theme` attribute for hot-swapping:
+    *   `Charcoal` (Dark Mode): Frosted slate surfaces overlaid on `/mac-abs-dark.png` wallpaper.
+    *   `Cream` (Light Mode): Ivory frosted surfaces overlaid on `/mac-abs-light.png` wallpaper.
+*   **Universal URL-Driven Filters:** No page-level filter clutter. All searches and filters (Fee Status, Rating, Attendance alerts, Seniority, Subjects, Genders, Notice scopes) are handled in the `Header` and bound directly to URL search parameters (`q`, `fees`, `rating`, `attendance`, `seniority`, `subject`, `gender`, `classes`, `scope`, `section`) via React Router `useSearchParams()`, making filtered rosters bookmarkable.
+*   **Theme-Aware Scrollbars:** Customized `-webkit-scrollbar` widgets styled using the active theme's borders and hover accents.
+
+---
+
+## 📂 Core Administration Views
+
+### 1. Database-Driven Roster (Students)
+*   **Categorized Class Selector:** Large card grids are collapsed into a single column Primary (Grade 1-5), Secondary (Grade 6-10), and Senior Secondary (Grade 11-12 split by Science, Commerce, and Arts) glass dropdown.
+*   **Combined Registers:** Sections (e.g., Grade 8-A and 8-B) are grouped dynamically. Lists load in alphabetical order displaying both class teachers.
+*   **Metadata Badges:** Displays average rating (Lucide star scales), attendance alerts (low attendance highlighted in red), and fee status flags (`PAID`, `PARTIAL`, `UNPAID`).
+*   **Roster details drawer:** Clicking a student opens a slide-out card showing parent contacts, birth dates, and gender.
+
+### 2. Faculty Directory (Teachers)
+*   **Multi-Filter Options:** Dynamic filtering by seniority index (Junior `< 2 yrs`, Mid `2-5 yrs`, Senior `> 5 yrs` computed from `user.createdAt`), course specialty, gender, and collapsible checkboxes of classes taught.
+*   **Faculty Details Card:** Opens a right-split panel rendering specialty, led class, list of other classes taught, and service tenure dates.
+*   **Warning animations:** The close (`X`) trigger scales and rotates into warning red (`#ef4444`) on hover.
+
+### 3. Announcements Board (Notices)
+*   **Notice list:** Displays bulletins, scope targets, and formatted publish timestamps.
+*   **Responsive Shrinking Split Layout:** Clicking a notice collapses the notice cards list container to `45%` width, letting the reading panel expand to `55%` width for comfortable full-screen reading. Notice selection synchronizes with router paths (`/admin/notices/:id`).
+*   **Form Publisher (`/admin/notices/new`):** Forms to input notice title/headline, message body, target checks (Global Broadcast vs. Class Target checkboxes grouped by Primary, Secondary, and Senior Sec accordion grids), and a disabled image file trigger.
 
 ---
 
@@ -97,7 +130,7 @@ pnpm exec prisma db seed
    - `student@school.com`
    - `student123`
 
-### 4. Run Development Servers
+### 5. Run Development Servers
 Start the backend Express server:
 ```bash
 pnpm run dev
@@ -124,6 +157,8 @@ To build and run the entire application (PostgreSQL database, Express backend, a
 2. **Apply migrations and seed the database inside the container:**
    ```bash
    docker compose exec server pnpm exec prisma migrate dev --name init
+   ```
+   ```bash
    docker compose exec server pnpm exec prisma db seed
    ```
 3. **Access the application:**
