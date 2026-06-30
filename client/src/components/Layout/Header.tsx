@@ -1,11 +1,21 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useSearchParams, useLocation } from "react-router-dom";
+import { useSearchParams, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import axios from "axios";
 import { Search, SlidersHorizontal, LogOut, Settings, User, ChevronDown } from "lucide-react";
 
 const API_URL = "http://localhost:9091/api";
 
+
+interface ClassDataResponse {
+  id: string;
+  name: string;
+}
+
+interface TeacherDataResponse {
+  id: string;
+  group: string;
+}
 
 export const Header: React.FC = () => {
   const { user, logout } = useAuth();
@@ -18,7 +28,8 @@ export const Header: React.FC = () => {
 
   const isStudentsPage = location.pathname === "/admin/students";
   const isTeachersPage = location.pathname === "/admin/teachers";
-  const showFilterButton = isStudentsPage || isTeachersPage;
+  const isNoticesPage = location.pathname.startsWith("/admin/notices") && !location.pathname.endsWith("/new");
+  const showFilterButton = isStudentsPage || isTeachersPage || isNoticesPage;
 
   // Active query parameter bindings
   const q = searchParams.get("q") || "";
@@ -56,7 +67,7 @@ export const Header: React.FC = () => {
         ]);
         
         // Extract classes names
-        const classNames = resClasses.data.map((c: any) => c.name);
+        const classNames = resClasses.data.map((c: ClassDataResponse) => c.name);
         setClassesList(classNames.sort());
 
         // Group-to-Subject map based on academic seeding
@@ -69,7 +80,7 @@ export const Header: React.FC = () => {
 
         // Extract subjects dynamically
         const subjectsSet = new Set<string>();
-        resTeachers.data.forEach((t: any) => {
+        resTeachers.data.forEach((t: TeacherDataResponse) => {
           const subjects = groupSubjects[t.group] || ["General Studies"];
           const subjectIndex = parseInt(t.id.slice(0, 4), 16) % subjects.length;
           subjectsSet.add(subjects[subjectIndex]);
@@ -170,7 +181,7 @@ export const Header: React.FC = () => {
           <Search style={{ position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", color: "var(--text-glass-muted)" }} size={18} />
           <input
             type="text"
-            placeholder={isStudentsPage ? "Search students by name..." : isTeachersPage ? "Search teachers by name or Emp ID..." : "Search dashboard logs..."}
+            placeholder={isStudentsPage ? "Search students by name..." : isTeachersPage ? "Search teachers by name or Emp ID..." : isNoticesPage ? "Search notices by title or message..." : "Search dashboard logs..."}
             value={q}
             onChange={(e) => updateQueryParam("q", e.target.value)}
             className="glass-panel glass-input"
@@ -235,7 +246,7 @@ export const Header: React.FC = () => {
                 }}
               >
                 <div style={{ fontWeight: "700", fontSize: "11px", textTransform: "uppercase", color: "var(--accent)", letterSpacing: "0.05em", borderBottom: "1px solid var(--glass-border)", paddingBottom: "4px" }}>
-                  {isStudentsPage ? "Student Filters" : "Faculty Filters"}
+                  {isStudentsPage ? "Student Filters" : isTeachersPage ? "Faculty Filters" : "Notice Filters"}
                 </div>
 
                 {/* Render Students Page Filter Menus */}
@@ -457,6 +468,62 @@ export const Header: React.FC = () => {
                   </>
                 )}
 
+                {/* Render Notices Page Filter Menus */}
+                {isNoticesPage && (
+                  <>
+                    {/* Scope Filter */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                      <label style={{ fontSize: "10px", color: "var(--text-glass-muted)", fontWeight: "700", textTransform: "uppercase" }}>Notice Scope</label>
+                      <select
+                        value={searchParams.get("scope") || "ALL"}
+                        onChange={(e) => updateQueryParam("scope", e.target.value)}
+                        className="glass-panel"
+                        style={{
+                          fontSize: "12px",
+                          padding: "0 10px",
+                          height: "36px",
+                          background: "rgba(255, 255, 255, 0.05)",
+                          color: "var(--text-glass)",
+                          border: "1px solid var(--glass-border)",
+                          borderRadius: "8px",
+                          cursor: "pointer",
+                          width: "100%"
+                        }}
+                      >
+                        <option value="ALL">All Notices</option>
+                        <option value="GLOBAL">Global Announcements</option>
+                        <option value="CLASS">Class Specific Notices</option>
+                      </select>
+                    </div>
+
+                    {/* Section Filter */}
+                    <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                      <label style={{ fontSize: "10px", color: "var(--text-glass-muted)", fontWeight: "700", textTransform: "uppercase" }}>Target Section</label>
+                      <select
+                        value={searchParams.get("section") || "ALL"}
+                        onChange={(e) => updateQueryParam("section", e.target.value)}
+                        className="glass-panel"
+                        style={{
+                          fontSize: "12px",
+                          padding: "0 10px",
+                          height: "36px",
+                          background: "rgba(255, 255, 255, 0.05)",
+                          color: "var(--text-glass)",
+                          border: "1px solid var(--glass-border)",
+                          borderRadius: "8px",
+                          cursor: "pointer",
+                          width: "100%"
+                        }}
+                      >
+                        <option value="ALL">All Sections</option>
+                        <option value="PRIMARY">Primary (Grades 1-5)</option>
+                        <option value="SECONDARY">Secondary (Grades 6-10)</option>
+                        <option value="SENIOR_SECONDARY">Senior Secondary (Grades 11-12)</option>
+                      </select>
+                    </div>
+                  </>
+                )}
+
                 {/* Reset Filters Option Button */}
                 <button
                   onClick={clearAllFilters}
@@ -480,6 +547,35 @@ export const Header: React.FC = () => {
               </div>
             )}
           </div>
+        )}
+
+        {/* Notices Create button */}
+        {isNoticesPage && (
+          <Link
+            to="/admin/notices/new"
+            className="glass-panel"
+            style={{
+              padding: "0 16px",
+              height: "42px",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              background: "var(--accent)",
+              color: "#fff",
+              border: "none",
+              borderRadius: "10px",
+              cursor: "pointer",
+              fontWeight: "600",
+              fontSize: "13px",
+              textDecoration: "none",
+              transition: "transform 0.15s ease",
+              justifyContent: "center",
+            }}
+            onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.95)")}
+            onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
+          >
+            <span style={{ whiteSpace: "nowrap" }}>+ Create</span>
+          </Link>
         )}
       </div>
 

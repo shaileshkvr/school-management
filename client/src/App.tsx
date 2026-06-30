@@ -9,6 +9,8 @@ import { TeacherDashboard } from "./pages/teacher/TeacherDashboard";
 import { StudentDashboard } from "./pages/student/StudentDashboard";
 import { StudentsPage } from "./pages/admin/StudentsPage";
 import { TeachersPage } from "./pages/admin/TeachersPage";
+import { NoticesPage } from "./pages/admin/NoticesPage";
+import { CreateNoticePage } from "./pages/admin/CreateNoticePage";
 
 function App() {
   // Set default theme attribute on mount
@@ -52,6 +54,39 @@ function App() {
               <ProtectedRoute allowedRoles={["ADMIN"]}>
                 <DashboardLayout>
                   <TeachersPage />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/notices"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <DashboardLayout>
+                  <NoticesPage />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/notices/:id"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <DashboardLayout>
+                  <NoticesPage />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/notices/new"
+            element={
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <DashboardLayout>
+                  <CreateNoticePage />
                 </DashboardLayout>
               </ProtectedRoute>
             }

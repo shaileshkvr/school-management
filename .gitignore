@@ -1,5 +1,5 @@
-antigravity
 node_modules/
-
 *.txt
+task.md
 .superpowers
+antigravity
